@@ -133,19 +133,9 @@ export default function SkinImageWithStickers({
         <img
           src={baseImageUrl}
           alt={skin.name || 'Skin'}
-          className={cropTop > 0 ? "absolute" : "w-full h-auto object-contain"}
-          style={cropTop > 0 ? {
-            width: '100%',
-            height: 'auto',
-            top: `${cropTop}px`,
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            minHeight: '100%',
-            minWidth: '100%',
-            objectFit: 'cover',
-            zIndex: 2
-          } : {
-            position: 'relative',
+          className="w-full h-full object-cover"
+          style={{
+            objectPosition: 'center 35%',
             zIndex: 2
           }}
           onError={(e) => {
