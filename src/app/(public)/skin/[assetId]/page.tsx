@@ -91,14 +91,28 @@ export default function SkinDetailPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
                     {/* Left Column - Images */}
                     <div className="space-y-4">
-                        {/* Main Image - Custom Screenshot OR Steam Image */}
+                        {/* Main Image - Logika:
+                            1. Pokud existuje detailImageUrl → zobrazí se jen tento obrázek
+                            2. Jinak: Custom Screenshot OR Steam Image
+                        */}
                         <div
                             className="bg-gray-900 rounded-2xl p-3 shadow-lg border-t-4 border border-gray-800 overflow-hidden"
                             style={{
                                 borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : '#3b82f6'
                             }}
                         >
-                            {skin.customScreenshotUrl ? (
+                            {skin.detailImageUrl ? (
+                                <>
+                                    <div className="text-xs text-gray-400 font-bold mb-2 text-center uppercase tracking-wide">
+                                        📸 Detail produktu
+                                    </div>
+                                    <img
+                                        src={skin.detailImageUrl}
+                                        alt={`${skin.name} - Detail`}
+                                        className="w-full h-auto object-contain rounded-lg"
+                                    />
+                                </>
+                            ) : skin.customScreenshotUrl ? (
                                 <>
                                     <div className="text-xs text-gray-400 font-bold mb-2 text-center uppercase tracking-wide">
                                         🎮 Skutečný vzhled ve hře
@@ -125,7 +139,7 @@ export default function SkinDetailPage() {
                             {skin.floatValue !== undefined && (
                                 <div className="mt-2 text-center relative z-10">
                                     <span className="text-xs text-gray-400">Opotřebení: </span>
-                                    <span className="text-sm font-bold text-green-400">
+                                    <span className="text-sm font-bold text-white">
                                         {SkinUtils.formatFloat(skin.floatValue)}
                                     </span>
                                 </div>
@@ -151,7 +165,7 @@ export default function SkinDetailPage() {
                         </div>
 
                         {/* Price - Always First */}
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-6 shadow-lg shadow-blue-500/20">
+                        <div className="bg-blue-600 text-white rounded-xl p-6 shadow-lg">
                             <div className="flex items-center gap-3 mb-2">
                                 <DollarSign size={24} />
                                 <span className="text-lg font-medium">Cena</span>
@@ -168,24 +182,24 @@ export default function SkinDetailPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Float Value */}
                                 {skin.floatValue !== undefined && (
-                                    <div className="bg-gradient-to-br from-green-900/50 to-emerald-900/50 rounded-xl p-4 border-2 border-green-700">
+                                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <TrendingUp size={18} className="text-green-400" />
-                                            <span className="text-sm font-medium text-green-300">Opotřebení</span>
+                                            <TrendingUp size={18} className="text-gray-400" />
+                                            <span className="text-sm font-medium text-gray-400">Opotřebení</span>
                                         </div>
                                         <div className={`text-2xl font-bold ${SkinUtils.isGoodFloat(skin.floatValue, skin.exterior)
-                                                ? 'text-green-400'
+                                                ? 'text-blue-400'
                                                 : 'text-white'
                                             }`}>
                                             {SkinUtils.formatFloat(skin.floatValue)}
                                         </div>
                                         {skin.exterior && (
-                                            <div className="text-xs text-gray-400 mt-1">
+                                            <div className="text-xs text-gray-500 mt-1">
                                                 Range: {SkinUtils.getWearRange(skin.exterior)}
                                             </div>
                                         )}
                                         {skin.minFloat !== undefined && skin.maxFloat !== undefined && (
-                                            <div className="text-xs text-gray-400 mt-1">
+                                            <div className="text-xs text-gray-500 mt-1">
                                                 Min: {skin.minFloat.toFixed(4)} | Max: {skin.maxFloat.toFixed(4)}
                                             </div>
                                         )}
@@ -194,15 +208,15 @@ export default function SkinDetailPage() {
 
                                 {/* Pattern Seed */}
                                 {skin.paintSeed !== undefined && (
-                                    <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-xl p-4 border-2 border-purple-700">
+                                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <Hash size={18} className="text-purple-400" />
-                                            <span className="text-sm font-medium text-purple-300">Číslo šablony</span>
+                                            <Hash size={18} className="text-gray-400" />
+                                            <span className="text-sm font-medium text-gray-400">Číslo šablony</span>
                                         </div>
-                                        <div className="text-2xl font-bold text-purple-400">
+                                        <div className="text-2xl font-bold text-white">
                                             #{skin.paintSeed}
                                         </div>
-                                        <div className="text-xs text-gray-400 mt-1">
+                                        <div className="text-xs text-gray-500 mt-1">
                                             Pattern Index
                                         </div>
                                     </div>
@@ -212,10 +226,10 @@ export default function SkinDetailPage() {
 
                         {/* Doppler Phase (pokud je to doppler) */}
                         {skin.dopplerPhase && (
-                            <div className="bg-gradient-to-br from-blue-900/50 to-cyan-900/50 rounded-xl p-4 border-2 border-blue-700">
+                            <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="text-2xl">💎</span>
-                                    <span className="text-sm font-medium text-blue-300">Doppler Phase</span>
+                                    <span className="text-sm font-medium text-gray-400">Doppler Phase</span>
                                 </div>
                                 <div className="text-2xl font-bold text-blue-400">
                                     {skin.dopplerPhase}
@@ -230,14 +244,14 @@ export default function SkinDetailPage() {
                         {skin.stickers && skin.stickers.length > 0 && (
                             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
                                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                    <Shield size={20} className="text-purple-400" />
+                                    <Shield size={20} className="text-gray-400" />
                                     Stickery ({skin.stickers.length})
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     {skin.stickers.map((sticker, idx) => (
                                         <div
                                             key={idx}
-                                            className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-lg p-4 border border-purple-700"
+                                            className="bg-gray-800 rounded-lg p-4 border border-gray-700"
                                         >
                                             <div className="flex items-center gap-3 mb-2">
                                                 {/* Sticker Image */}
@@ -249,7 +263,7 @@ export default function SkinDetailPage() {
                                                     />
                                                 )}
                                                 <div className="flex-1">
-                                                    <div className="text-xs text-purple-400 font-bold">
+                                                    <div className="text-xs text-gray-400 font-bold">
                                                         Pozice {sticker.position}
                                                     </div>
                                                     {sticker.name && (
@@ -259,7 +273,7 @@ export default function SkinDetailPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="text-xs text-gray-400 font-mono">
+                                            <div className="text-xs text-gray-500 font-mono">
                                                 ID: {sticker.classId}
                                             </div>
                                         </div>
@@ -272,7 +286,7 @@ export default function SkinDetailPage() {
                         {skin.inspectLink && (
                             <a
                                 href={skin.inspectLink}
-                                className="block bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                                className="block bg-blue-600 rounded-2xl p-6 text-white shadow-lg hover:bg-blue-700 transition-all"
                             >
                                 <div className="text-center">
                                     <div className="text-sm font-bold mb-2">

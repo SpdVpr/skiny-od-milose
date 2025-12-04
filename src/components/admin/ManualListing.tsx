@@ -63,6 +63,8 @@ export default function ManualListing() {
   const [stickers, setStickers] = useState<StickerInput[]>([]);
   const [customImage, setCustomImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [detailImage, setDetailImage] = useState<File | null>(null);
+  const [detailImagePreview, setDetailImagePreview] = useState<string | null>(null);
 
   // Market info state
   const [tradable, setTradable] = useState(true);
@@ -202,6 +204,32 @@ export default function ManualListing() {
     reader.readAsDataURL(file);
   };
 
+  // Handler pro výběr detail obrázku
+  const handleDetailImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validace
+    if (!file.type.startsWith('image/')) {
+      toast.error('Prosím vyberte obrázek');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Obrázek je příliš velký (max 10MB)');
+      return;
+    }
+
+    setDetailImage(file);
+
+    // Vytvoříme preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setDetailImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -261,6 +289,30 @@ export default function ManualListing() {
         }
       }
 
+      // Upload detail obrázku (pokud byl vybrán)
+      let detailImageUrl: string | undefined = undefined;
+      if (detailImage) {
+        try {
+          toast.dismiss();
+          toast.loading('Nahrávám detail obrázek...');
+
+          // Zmenšíme obrázek
+          const resizedBlob = await resizeImage(detailImage, 1200);
+
+          // Upload do Firebase Storage
+          const storageRef = ref(storage, `skins/${assetId}/detail.jpg`);
+          await uploadBytes(storageRef, resizedBlob);
+
+          // Získáme URL
+          detailImageUrl = await getDownloadURL(storageRef);
+          console.log('✅ Detail obrázek úspěšně nahrán:', detailImageUrl);
+        } catch (error) {
+          console.error('❌ Chyba při nahrávání detail obrázku:', error);
+          toast.dismiss();
+          toast.error('Nepodařilo se nahrát detail obrázek, ale skin bude přidán');
+        }
+      }
+
       // Vytvoříme skin objekt
       const skinData: Partial<Skin> = {
         assetId,
@@ -279,6 +331,7 @@ export default function ManualListing() {
         nameColor: 'd32ce6',
         rarityColor: 'd32ce6',
         customScreenshotUrl: customScreenshotUrl,
+        detailImageUrl: detailImageUrl,
 
         // Float & Pattern
         floatValue: floatValue ? parseFloat(floatValue) : undefined,
@@ -332,6 +385,8 @@ export default function ManualListing() {
       setStickers([]);
       setCustomImage(null);
       setImagePreview(null);
+      setDetailImage(null);
+      setDetailImagePreview(null);
       setShowModal(false);
 
       // Reload stránky
@@ -552,6 +607,53 @@ export default function ManualListing() {
                     )}
                     <p className="text-xs text-gray-500">
                       Obrázek bude automaticky zmenšen na optimální velikost (max 1200px šířka)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Upload detail obrázku */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Detail obrázek (volitelné)
+                  </label>
+                  <div className="space-y-3">
+                    {detailImagePreview ? (
+                      <div className="relative">
+                        <img
+                          src={detailImagePreview}
+                          alt="Detail Preview"
+                          className="w-32 h-32 object-cover rounded-lg border border-gray-700"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDetailImage(null);
+                            setDetailImagePreview(null);
+                          }}
+                          className="absolute top-2 right-2 p-1 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-[#0f1117]">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <ImageIcon className="w-8 h-8 text-gray-500 mb-2" />
+                          <p className="text-sm text-gray-400">
+                            <span className="font-semibold">Klikněte pro nahrání</span> nebo přetáhněte
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">PNG, JPG (max 10MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleDetailImageSelect}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Pokud existuje Steam obrázek, tento se zobrazí jen v detailu. Jinak jako náhledový.
                     </p>
                   </div>
                 </div>

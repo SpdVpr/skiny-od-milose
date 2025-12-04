@@ -663,13 +663,25 @@ export default function InventoryTable() {
                                                 </div>
 
                                                 {/* Right: Screenshot Upload */}
-                                                <div>
-                                                    <h3 className="text-sm font-bold text-slate-700 mb-3">📸 Screenshot Management</h3>
-                                                    <ScreenshotUpload
-                                                        skinId={skin.assetId}
-                                                        currentScreenshotUrl={skin.customScreenshotUrl}
-                                                        onUploadComplete={() => fetchSkins()}
-                                                    />
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <h3 className="text-sm font-bold text-slate-700 mb-3">📸 Screenshot Management</h3>
+                                                        <ScreenshotUpload
+                                                            skinId={skin.assetId}
+                                                            currentScreenshotUrl={skin.customScreenshotUrl}
+                                                            onUploadComplete={() => fetchSkins()}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-sm font-bold text-slate-700 mb-3">🖼️ Detail Image</h3>
+                                                        <ScreenshotUpload
+                                                            skinId={skin.assetId}
+                                                            currentScreenshotUrl={skin.detailImageUrl}
+                                                            onUploadComplete={() => fetchSkins()}
+                                                            fieldName="detailImageUrl"
+                                                            storagePath={`skins/${skin.assetId}/detail.jpg`}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>

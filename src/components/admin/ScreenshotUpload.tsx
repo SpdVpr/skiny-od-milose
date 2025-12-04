@@ -11,12 +11,16 @@ interface ScreenshotUploadProps {
   skinId: string;
   currentScreenshotUrl?: string;
   onUploadComplete?: (url: string) => void;
+  fieldName?: string; // Název pole v Firestore (default: 'customScreenshotUrl')
+  storagePath?: string; // Cesta v Storage (default: 'skins/{skinId}/screenshot.jpg')
 }
 
-export default function ScreenshotUpload({ 
-  skinId, 
+export default function ScreenshotUpload({
+  skinId,
   currentScreenshotUrl,
-  onUploadComplete 
+  onUploadComplete,
+  fieldName = 'customScreenshotUrl',
+  storagePath
 }: ScreenshotUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentScreenshotUrl || null);
@@ -41,7 +45,8 @@ export default function ScreenshotUpload({
 
     try {
       // Upload do Firebase Storage
-      const storageRef = ref(storage, `skins/${skinId}/screenshot.jpg`);
+      const finalStoragePath = storagePath || `skins/${skinId}/screenshot.jpg`;
+      const storageRef = ref(storage, finalStoragePath);
       await uploadBytes(storageRef, file);
 
       // Získáme URL
@@ -49,7 +54,7 @@ export default function ScreenshotUpload({
 
       // Uložíme URL do Firestore
       await updateDoc(doc(db, 'skins', skinId), {
-        customScreenshotUrl: downloadUrl
+        [fieldName]: downloadUrl
       });
 
       setPreviewUrl(downloadUrl);
@@ -79,12 +84,13 @@ export default function ScreenshotUpload({
 
     try {
       // Smažeme z Storage
-      const storageRef = ref(storage, `skins/${skinId}/screenshot.jpg`);
+      const finalStoragePath = storagePath || `skins/${skinId}/screenshot.jpg`;
+      const storageRef = ref(storage, finalStoragePath);
       await deleteObject(storageRef);
 
       // Smažeme URL z Firestore
       await updateDoc(doc(db, 'skins', skinId), {
-        customScreenshotUrl: null
+        [fieldName]: null
       });
 
       setPreviewUrl(null);

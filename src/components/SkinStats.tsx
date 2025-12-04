@@ -12,15 +12,15 @@ export default function SkinStats({ skin }: SkinStatsProps) {
       {/* Float Value */}
       {skin.floatValue !== undefined && (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-900/50 flex items-center justify-center border border-blue-700">
-            <TrendingUp className="text-blue-400" size={20} />
+          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-700">
+            <TrendingUp className="text-gray-400" size={20} />
           </div>
           <div className="flex-1">
             <div className="text-xs text-gray-400 font-medium">Float Value</div>
             <div className="text-lg font-bold text-white">
               {SkinUtils.formatFloat(skin.floatValue)}
               {skin.exterior && SkinUtils.isGoodFloat(skin.floatValue, skin.exterior) && (
-                <span className="ml-2 text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full border border-green-700">
+                <span className="ml-2 text-xs bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded-full border border-blue-700">
                   Dobrý float
                 </span>
               )}
@@ -37,8 +37,8 @@ export default function SkinStats({ skin }: SkinStatsProps) {
       {/* Pattern Seed */}
       {skin.paintSeed !== undefined && (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-900/50 flex items-center justify-center border border-purple-700">
-            <Hash className="text-purple-400" size={20} />
+          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-700">
+            <Hash className="text-gray-400" size={20} />
           </div>
           <div className="flex-1">
             <div className="text-xs text-gray-400 font-medium">Pattern Seed</div>
@@ -73,12 +73,12 @@ export default function SkinStats({ skin }: SkinStatsProps) {
       {/* Name Tag */}
       {skin.nameTag && (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-900/50 flex items-center justify-center border border-amber-700">
-            <Tag className="text-amber-400" size={20} />
+          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-700">
+            <Tag className="text-gray-400" size={20} />
           </div>
           <div className="flex-1">
             <div className="text-xs text-gray-400 font-medium">Name Tag</div>
-            <div className="text-lg font-bold text-amber-400">"{skin.nameTag}"</div>
+            <div className="text-lg font-bold text-white">"{skin.nameTag}"</div>
           </div>
         </div>
       )}
@@ -128,7 +128,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
       <div className="pt-2 border-t border-gray-800">
         <div className="flex gap-2 flex-wrap">
           {skin.tradable && (
-            <span className="text-xs bg-green-900/50 text-green-400 px-2 py-1 rounded-full font-medium border border-green-700">
+            <span className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded-full font-medium border border-gray-700">
               Tradable
             </span>
           )}
@@ -138,7 +138,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
             </span>
           )}
           {skin.commodity && (
-            <span className="text-xs bg-purple-900/50 text-purple-400 px-2 py-1 rounded-full font-medium border border-purple-700">
+            <span className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded-full font-medium border border-gray-700">
               Commodity
             </span>
           )}
@@ -147,8 +147,8 @@ export default function SkinStats({ skin }: SkinStatsProps) {
         {/* Trade Restriction Date */}
         {skin.tradeRestrictionDate && (
           <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
-            <Calendar size={14} className="text-orange-400" />
-            <span>Obchodovatelné od: <span className="text-orange-400 font-medium">{skin.tradeRestrictionDate}</span></span>
+            <Calendar size={14} className="text-gray-400" />
+            <span>Obchodovatelné od: <span className="text-white font-medium">{skin.tradeRestrictionDate}</span></span>
           </div>
         )}
       </div>

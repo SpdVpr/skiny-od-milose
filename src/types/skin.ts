@@ -43,6 +43,7 @@ export interface Skin {
   nameColor?: string; // Barva názvu (např. "#8847ff" pro Covert)
   customScreenshotUrl?: string; // Vlastní screenshot nahraný adminem (skutečný vzhled ve hře)
   csFloatImageUrl?: string; // High-res obrázek z CSFloat API (s přesným floatem, patternem a stickery)
+  detailImageUrl?: string; // Další obrázek pro detail produktu (pokud existuje Steam obrázek, zobrazí se jen v detailu; jinak jako náhledový)
 
   // ===== FLOAT & PATTERN =====
   floatValue?: number; // 0.0 - 1.0 (přesné opotřebení)
@@ -171,22 +172,39 @@ export const SkinUtils = {
   },
 
   /**
-   * Vrátí nejlepší dostupný obrázek skinu (priorita: Custom Screenshot > Steam Composite > Steam High-Res)
-   * Poznámka: CSFloat API nevrací render obrázky, pouze inspect data (float, stickery, paint seed)
-   * Pro obrázky se stickery používáme Steam CDN composite API
+   * Vrátí nejlepší dostupný obrázek skinu pro NÁHLED (karty, grid)
+   * Logika:
+   * - Pokud existuje Steam obrázek (iconUrl/imageUrl) → použije se Steam obrázek
+   * - Pokud NEEXISTUJE Steam obrázek → použije se detailImageUrl (pokud existuje)
+   * - Fallback: customScreenshotUrl nebo placeholder
    */
   getBestImageUrl(skin: Partial<Skin>): string {
-    // 1. Priorita: Vlastní screenshot nahraný adminem (skutečný in-game screenshot)
+    // Pokud má Steam obrázek (z importu), použijeme ho
+    if (skin.iconUrl || (skin.imageUrl && skin.imageUrl.includes('steamcommunity.com'))) {
+      // 1. Priorita: Vlastní screenshot nahraný adminem (skutečný in-game screenshot)
+      if (skin.customScreenshotUrl) {
+        return skin.customScreenshotUrl;
+      }
+
+      // 2. Priorita: Steam CDN composite image se stickery (pokud má stickery)
+      if (skin.stickers && skin.stickers.length > 0) {
+        return this.getImageWithStickers(skin);
+      }
+
+      // 3. Steam high-res obrázek
+      return this.getHighResImageUrl(skin);
+    }
+
+    // Pokud NEMÁ Steam obrázek → použijeme detailImageUrl jako náhledový
+    if (skin.detailImageUrl) {
+      return skin.detailImageUrl;
+    }
+
+    // Fallback: customScreenshotUrl nebo placeholder
     if (skin.customScreenshotUrl) {
       return skin.customScreenshotUrl;
     }
 
-    // 2. Priorita: Steam CDN composite image se stickery (pokud má stickery)
-    if (skin.stickers && skin.stickers.length > 0) {
-      return this.getImageWithStickers(skin);
-    }
-
-    // 3. Fallback: Steam high-res obrázek
     return this.getHighResImageUrl(skin);
   },
 
