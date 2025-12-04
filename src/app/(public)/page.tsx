@@ -242,17 +242,17 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Products Grid - 5 columns */}
+            {/* Products Grid - 7 columns */}
             <section className="py-6 px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto" style={{ maxWidth: '1800px' }}>
+                <div className="mx-auto" style={{ maxWidth: '2400px' }}>
                     {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                            {[...Array(10)].map((_, i) => (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4">
+                            {[...Array(14)].map((_, i) => (
                                 <div key={i} className="h-96 bg-gray-900 rounded-2xl animate-pulse border border-gray-800" />
                             ))}
                         </div>
                     ) : filteredSkins.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4">
                             {filteredSkins.map(skin => (
                                 <SkinCard key={skin.assetId} skin={skin} />
                             ))}
