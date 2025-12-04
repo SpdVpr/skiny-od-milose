@@ -45,6 +45,8 @@ export default function SkinImageWithStickers({
     const loadStickerImages = async () => {
       const images: Record<string, string> = {};
 
+      if (!skin.stickers) return;
+
       for (const sticker of skin.stickers) {
         try {
           // Steam CDN URL pro sticker obrázek
