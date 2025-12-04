@@ -323,26 +323,6 @@ export default function SkinDetailPage() {
                                 </div>
                             )}
 
-                            {/* Tags - Steam Style */}
-                            {skin.tags && skin.tags.length > 0 && (
-                                <div className="pt-4 border-t border-gray-800">
-                                    <div className="text-gray-400 text-sm mb-2 font-medium">
-                                        🏷️ Značky (jako na Steamu)
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {skin.tags.map((tag, idx) => (
-                                            <span
-                                                key={idx}
-                                                className="bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-gray-600 transition-colors"
-                                                title={`${tag.localized_category_name}: ${tag.localized_tag_name}`}
-                                            >
-                                                {tag.localized_tag_name || tag.internal_name}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Tradable/Marketable Status */}
                             <div className="pt-4 border-t border-gray-800">
                                 <div className="text-gray-400 text-sm mb-2 font-medium">Status</div>
