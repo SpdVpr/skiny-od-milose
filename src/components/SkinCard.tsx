@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, Award, Hash, Tag } from 'lucide-react';
+import { Award, Hash, Tag } from 'lucide-react';
 import { Skin, SkinUtils } from '@/types/skin';
 import SkinImageWithStickers from './SkinImageWithStickers';
 
@@ -80,8 +80,8 @@ export default function SkinCard({ skin }: SkinProps) {
                     {skin.name}
                 </h3>
 
-                {/* Stats Row */}
-                <div className="flex items-center gap-2 text-xs text-gray-400">
+                {/* Stats Row with Price */}
+                <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
                     {skin.floatValue !== undefined && (
                         <div className="flex items-center gap-1">
                             <span className="font-medium">Float:</span>
@@ -101,31 +101,13 @@ export default function SkinCard({ skin }: SkinProps) {
                             <span className="font-bold text-gray-300">{skin.paintSeed}</span>
                         </div>
                     )}
-                </div>
-
-                {/* Weapon Type */}
-                {skin.weaponType && (
-                    <div className="text-xs text-gray-500 mt-1">
-                        {skin.weaponType}
+                    {/* Price */}
+                    <div className="flex items-center gap-1 ml-auto">
+                        <span className="text-base font-bold text-blue-400">
+                            {skin.price ? `${skin.price} Kč` : 'na dotaz'}
+                        </span>
                     </div>
-                )}
-            </div>
-
-            {/* Footer */}
-            <div className="mt-4 flex items-center justify-between">
-                <div className="text-lg font-bold text-blue-400">
-                    {skin.price ? `${skin.price} Kč` : 'na dotaz'}
                 </div>
-                {skin.inspectLink && (
-                    <a
-                        href={skin.inspectLink}
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-800 rounded-lg transition-colors"
-                        title="Inspect in Game"
-                    >
-                        <ExternalLink size={20} />
-                    </a>
-                )}
             </div>
         </div>
     );

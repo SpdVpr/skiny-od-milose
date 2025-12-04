@@ -40,14 +40,16 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Automatické posouvání
+    // Automatické posouvání - posouváme po celých stránkách
     useEffect(() => {
         if (!isAutoPlaying || reviews.length <= itemsPerView) return;
 
         const interval = setInterval(() => {
             setCurrentIndex((prev) => {
-                const maxIndex = Math.max(0, reviews.length - itemsPerView);
-                return prev >= maxIndex ? 0 : prev + 1;
+                const totalPages = Math.ceil(reviews.length / itemsPerView);
+                const currentPage = Math.floor(prev / itemsPerView);
+                const nextPage = (currentPage + 1) % totalPages;
+                return nextPage * itemsPerView;
             });
         }, 5000); // Posune každých 5 sekund
 
@@ -56,14 +58,21 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
 
     const goToPrevious = () => {
         setIsAutoPlaying(false);
-        setCurrentIndex((prev) => (prev === 0 ? Math.max(0, reviews.length - itemsPerView) : prev - 1));
+        setCurrentIndex((prev) => {
+            const totalPages = Math.ceil(reviews.length / itemsPerView);
+            const currentPage = Math.floor(prev / itemsPerView);
+            const prevPage = currentPage === 0 ? totalPages - 1 : currentPage - 1;
+            return prevPage * itemsPerView;
+        });
     };
 
     const goToNext = () => {
         setIsAutoPlaying(false);
         setCurrentIndex((prev) => {
-            const maxIndex = Math.max(0, reviews.length - itemsPerView);
-            return prev >= maxIndex ? 0 : prev + 1;
+            const totalPages = Math.ceil(reviews.length / itemsPerView);
+            const currentPage = Math.floor(prev / itemsPerView);
+            const nextPage = (currentPage + 1) % totalPages;
+            return nextPage * itemsPerView;
         });
     };
 
@@ -74,8 +83,6 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
             </div>
         );
     }
-
-    const maxIndex = Math.max(0, reviews.length - itemsPerView);
 
     return (
         <div className="relative">
@@ -111,20 +118,16 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                     </>
                 )}
 
-                {/* Reviews Grid */}
-                <div className="overflow-hidden px-2">
-                    <div
-                        className="flex transition-transform duration-500 ease-in-out gap-6"
-                        style={{
-                            transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                        }}
-                    >
-                        {reviews.map((review) => (
-                            <div
-                                key={review.id}
-                                className="flex-shrink-0"
-                                style={{ width: `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 24 / itemsPerView}px)` }}
-                            >
+                {/* Reviews Grid - Zobrazujeme pouze aktuální stránku */}
+                <div className="px-2">
+                    <div className={`grid gap-6 ${
+                        itemsPerView === 1 ? 'grid-cols-1' :
+                        itemsPerView === 2 ? 'grid-cols-2' :
+                        itemsPerView === 3 ? 'grid-cols-3' :
+                        'grid-cols-4'
+                    }`}>
+                        {reviews.slice(currentIndex, currentIndex + itemsPerView).map((review) => (
+                            <div key={review.id} className="w-full">
                                 <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 hover:border-gray-700 transition-all h-full flex flex-col">
                                     {/* Rating Stars */}
                                     <div className="flex items-center gap-1 mb-3">
@@ -156,16 +159,16 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                 {/* Dots Indicator */}
                 {reviews.length > itemsPerView && (
                     <div className="flex justify-center gap-2 mt-6">
-                        {[...Array(maxIndex + 1)].map((_, index) => (
+                        {[...Array(Math.ceil(reviews.length / itemsPerView))].map((_, pageIndex) => (
                             <button
-                                key={index}
+                                key={pageIndex}
                                 onClick={() => {
-                                    setCurrentIndex(index);
+                                    setCurrentIndex(pageIndex * itemsPerView);
                                     setIsAutoPlaying(false);
                                 }}
-                                className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? 'bg-blue-500 w-8' : 'bg-gray-600 hover:bg-gray-500'
+                                className={`w-2 h-2 rounded-full transition-all ${currentIndex === pageIndex * itemsPerView ? 'bg-blue-500 w-8' : 'bg-gray-600 hover:bg-gray-500'
                                     }`}
-                                aria-label={`Go to slide ${index + 1}`}
+                                aria-label={`Go to page ${pageIndex + 1}`}
                             />
                         ))}
                     </div>

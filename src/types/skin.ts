@@ -71,6 +71,7 @@ export interface Skin {
   commodity?: boolean; // Je to stackable item? (např. klíče, kapsle)
   tradeRestrictionDays?: number; // Dny do možnosti tradu
   marketRestrictionDays?: number; // Dny do možnosti prodeje
+  tradeRestrictionDate?: string; // Datum, od kdy lze obchodovat (formát: YYYY-MM-DD nebo DD.MM.YYYY)
 
   // ===== TOURNAMENT =====
   tournament?: string; // "DreamHack Winter 2014", atd.

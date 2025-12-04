@@ -64,6 +64,11 @@ export default function ManualListing() {
   const [customImage, setCustomImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  // Market info state
+  const [tradable, setTradable] = useState(true);
+  const [marketable, setMarketable] = useState(true);
+  const [tradeRestrictionDate, setTradeRestrictionDate] = useState('');
+
   // Sticker search
   const [stickerSearchQuery, setStickerSearchQuery] = useState<string[]>([]);
   const [showStickerDropdown, setShowStickerDropdown] = useState<number | null>(null);
@@ -290,8 +295,9 @@ export default function ManualListing() {
         stickers: skinStickers.length > 0 ? skinStickers : undefined,
 
         // Market info
-        tradable: true,
-        marketable: true,
+        tradable: tradable,
+        marketable: marketable,
+        tradeRestrictionDate: tradeRestrictionDate.trim() || undefined,
 
         // Cena (volitelná)
         price: price.trim() ? parseFloat(price) : undefined,
@@ -547,6 +553,57 @@ export default function ManualListing() {
                     <p className="text-xs text-gray-500">
                       Obrázek bude automaticky zmenšen na optimální velikost (max 1200px šířka)
                     </p>
+                  </div>
+                </div>
+
+                {/* Market Info - Tradable & Marketable */}
+                <div className="border border-gray-700 rounded-lg p-4 bg-[#0a0b0f]">
+                  <h3 className="text-sm font-medium text-gray-300 mb-3">📊 Informace o obchodovatelnosti</h3>
+
+                  <div className="space-y-3">
+                    {/* Tradable */}
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="tradable"
+                        checked={tradable}
+                        onChange={(e) => setTradable(e.target.checked)}
+                        className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="tradable" className="text-sm text-gray-300">
+                        Tradable (Lze vyměnit)
+                      </label>
+                    </div>
+
+                    {/* Marketable */}
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="marketable"
+                        checked={marketable}
+                        onChange={(e) => setMarketable(e.target.checked)}
+                        className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="marketable" className="text-sm text-gray-300">
+                        Marketable (Lze prodat na marketu)
+                      </label>
+                    </div>
+
+                    {/* Trade Restriction Date */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Obchodovatelné od (datum)
+                      </label>
+                      <input
+                        type="date"
+                        value={tradeRestrictionDate}
+                        onChange={(e) => setTradeRestrictionDate(e.target.value)}
+                        className="w-full px-4 py-2 bg-[#0f1117] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Volitelné - pokud má item trade lock, zadejte datum, od kdy bude možné ho vyměnit
+                      </p>
+                    </div>
                   </div>
                 </div>
 

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, updateDoc, query, orderBy, writeBatch, deleteDoc } from 'firebase/firestore';
-import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2 } from 'lucide-react';
+import { collection, getDocs, doc, updateDoc, setDoc, query, orderBy, writeBatch, deleteDoc, Timestamp } from 'firebase/firestore';
+import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skin, SkinUtils } from '@/types/skin';
 import SkinStats from '@/components/SkinStats';
@@ -214,6 +214,40 @@ export default function InventoryTable() {
             toast.error('Chyba při mazání skinů');
         } finally {
             setIsBulkUpdating(false);
+        }
+    };
+
+    const copySkin = async (skin: Skin) => {
+        try {
+            // Vytvoříme nové unikátní ID pro kopii
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substring(2, 10);
+            const newAssetId = `copy_${timestamp}_${randomStr}`;
+
+            // Vytvoříme kopii skinu s novým ID a nastavíme jako neviditelný
+            const skinCopy: Partial<Skin> = {
+                ...skin,
+                assetId: newAssetId,
+                isVisible: false, // Skryjeme kopii, aby ji admin mohl upravit před zveřejněním
+                name: `${skin.name} (Kopie)`, // Přidáme "(Kopie)" do názvu
+                updatedAt: Timestamp.now(), // Aktualizujeme timestamp
+            };
+
+            // Odstraníme undefined hodnoty
+            const cleanedData = Object.fromEntries(
+                Object.entries(skinCopy).filter(([_, v]) => v !== undefined)
+            );
+
+            // Uložíme do Firestore (použijeme setDoc pro vytvoření nového dokumentu)
+            await setDoc(doc(db, 'skins', newAssetId), cleanedData);
+
+            toast.success(`Skin "${skin.name}" byl zkopírován! Kopie je skrytá a můžete ji upravit.`);
+
+            // Obnovíme data z databáze
+            fetchSkins();
+        } catch (error) {
+            console.error('Copy error:', error);
+            toast.error('Chyba při kopírování skinu');
         }
     };
 
@@ -597,6 +631,13 @@ export default function InventoryTable() {
                                                 <Edit size={18} />
                                             </button>
                                             <button
+                                                onClick={() => copySkin(skin)}
+                                                className="p-2 rounded-lg transition-colors bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                                title="Kopírovat produkt"
+                                            >
+                                                <Copy size={18} />
+                                            </button>
+                                            <button
                                                 onClick={() => toggleVisibility(skin)}
                                                 className={`p-2 rounded-lg transition-colors ${skin.isVisible
                                                     ? 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -746,6 +787,57 @@ export default function InventoryTable() {
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
                                     placeholder="steam://rungame/730/..."
                                 />
+                            </div>
+
+                            {/* Market Info - Tradable & Marketable */}
+                            <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                <h3 className="text-sm font-medium text-gray-700 mb-3">📊 Informace o obchodovatelnosti</h3>
+
+                                <div className="space-y-3">
+                                    {/* Tradable */}
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            id="edit-tradable"
+                                            checked={editingSkin.tradable}
+                                            onChange={(e) => setEditingSkin({ ...editingSkin, tradable: e.target.checked })}
+                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <label htmlFor="edit-tradable" className="text-sm text-gray-700">
+                                            Tradable (Lze vyměnit)
+                                        </label>
+                                    </div>
+
+                                    {/* Marketable */}
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            id="edit-marketable"
+                                            checked={editingSkin.marketable}
+                                            onChange={(e) => setEditingSkin({ ...editingSkin, marketable: e.target.checked })}
+                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <label htmlFor="edit-marketable" className="text-sm text-gray-700">
+                                            Marketable (Lze prodat na marketu)
+                                        </label>
+                                    </div>
+
+                                    {/* Trade Restriction Date */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Obchodovatelné od (datum)
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={editingSkin.tradeRestrictionDate || ''}
+                                            onChange={(e) => setEditingSkin({ ...editingSkin, tradeRestrictionDate: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Volitelné - pokud má item trade lock, zadejte datum, od kdy bude možné ho vyměnit
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

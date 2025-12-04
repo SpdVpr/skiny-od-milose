@@ -125,21 +125,31 @@ export default function SkinStats({ skin }: SkinStatsProps) {
       )}
 
       {/* Market Info */}
-      <div className="pt-2 border-t border-gray-800 flex gap-2">
-        {skin.tradable && (
-          <span className="text-xs bg-green-900/50 text-green-400 px-2 py-1 rounded-full font-medium border border-green-700">
-            Tradable
-          </span>
-        )}
-        {skin.marketable && (
-          <span className="text-xs bg-blue-900/50 text-blue-400 px-2 py-1 rounded-full font-medium border border-blue-700">
-            Marketable
-          </span>
-        )}
-        {skin.commodity && (
-          <span className="text-xs bg-purple-900/50 text-purple-400 px-2 py-1 rounded-full font-medium border border-purple-700">
-            Commodity
-          </span>
+      <div className="pt-2 border-t border-gray-800">
+        <div className="flex gap-2 flex-wrap">
+          {skin.tradable && (
+            <span className="text-xs bg-green-900/50 text-green-400 px-2 py-1 rounded-full font-medium border border-green-700">
+              Tradable
+            </span>
+          )}
+          {skin.marketable && (
+            <span className="text-xs bg-blue-900/50 text-blue-400 px-2 py-1 rounded-full font-medium border border-blue-700">
+              Marketable
+            </span>
+          )}
+          {skin.commodity && (
+            <span className="text-xs bg-purple-900/50 text-purple-400 px-2 py-1 rounded-full font-medium border border-purple-700">
+              Commodity
+            </span>
+          )}
+        </div>
+
+        {/* Trade Restriction Date */}
+        {skin.tradeRestrictionDate && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+            <Calendar size={14} className="text-orange-400" />
+            <span>Obchodovatelné od: <span className="text-orange-400 font-medium">{skin.tradeRestrictionDate}</span></span>
+          </div>
         )}
       </div>
     </div>

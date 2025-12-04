@@ -157,7 +157,7 @@ export default function HomePage() {
     return (
         <div className="min-h-screen bg-black">
             {/* Header / Logo */}
-            <header className="py-8 px-4 sm:px-6 lg:px-8">
+            <header className="py-6 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto text-center">
                     <h1 className="text-5xl lg:text-6xl text-white tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 400 }}>
                         Skiny od Miloše
@@ -166,33 +166,33 @@ export default function HomePage() {
             </header>
 
             {/* Hero Section - Představení + Kontakt */}
-            <section className="py-12 px-4 sm:px-6 lg:px-8">
+            <section className="py-6 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 lg:p-12 border border-gray-700 shadow-2xl">
+                    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 lg:p-8 border border-gray-700 shadow-2xl">
                         <div className="text-center max-w-3xl mx-auto">
-                            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+                            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
                                 Vítejte v obchodě s CS:GO skiny
                             </h2>
-                            <p className="text-lg text-gray-300 mb-8">
+                            <p className="text-base text-gray-300 mb-6">
                                 Nabízím kvalitní CS:GO skiny za férové ceny. Rychlé jednání, ověřené float hodnoty a stovky spokojených zákazníků.
                             </p>
-                            <div className="flex flex-wrap justify-center gap-4">
+                            <div className="flex flex-wrap justify-center gap-3">
                                 <a
                                     href="https://www.facebook.com/skinyodmilose"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
                                 >
-                                    <Facebook size={20} />
+                                    <Facebook size={18} />
                                     Facebook
                                 </a>
                                 <a
                                     href="https://www.facebook.com/skinyodmilose"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
+                                    className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
                                 >
-                                    <MessageCircle size={20} />
+                                    <MessageCircle size={18} />
                                     Kontakt
                                 </a>
                             </div>
@@ -202,34 +202,34 @@ export default function HomePage() {
             </section>
 
             {/* Reviews Section */}
-            <section className="py-12 px-4 sm:px-6 lg:px-8">
+            <section className="py-6 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto" style={{ maxWidth: '1500px' }}>
                     <ReviewsCarousel reviews={reviews} />
                 </div>
             </section>
 
             {/* Filter Section */}
-            <section className="py-8 px-4 sm:px-6 lg:px-8">
+            <section className="py-4 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     {/* Search */}
-                    <div className="relative w-full max-w-2xl mx-auto mb-6">
+                    <div className="relative w-full max-w-2xl mx-auto mb-4">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                         <input
                             type="text"
                             placeholder="Hledej..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-800 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-all"
+                            className="w-full pl-12 pr-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-all"
                         />
                     </div>
 
                     {/* Categories */}
-                    <div className="flex flex-wrap justify-center gap-3">
+                    <div className="flex flex-wrap justify-center gap-2">
                         {CATEGORIES.map(category => (
                             <button
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.id)}
-                                className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
+                                className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
                                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50'
                                         : 'bg-gray-900 text-gray-300 border border-gray-800 hover:border-gray-700 hover:bg-gray-800'
                                     }`}
@@ -243,7 +243,7 @@ export default function HomePage() {
             </section>
 
             {/* Products Grid - 4 columns */}
-            <section className="py-12 px-4 sm:px-6 lg:px-8">
+            <section className="py-6 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto" style={{ maxWidth: '1500px' }}>
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
