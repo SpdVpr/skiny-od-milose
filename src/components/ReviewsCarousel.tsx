@@ -40,16 +40,14 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Automatické posouvání - posouváme po celých stránkách
+    // Automatické posouvání - posouváme po jedné recenzi
     useEffect(() => {
         if (!isAutoPlaying || reviews.length <= itemsPerView) return;
 
         const interval = setInterval(() => {
             setCurrentIndex((prev) => {
-                const totalPages = Math.ceil(reviews.length / itemsPerView);
-                const currentPage = Math.floor(prev / itemsPerView);
-                const nextPage = (currentPage + 1) % totalPages;
-                return nextPage * itemsPerView;
+                const maxIndex = reviews.length - itemsPerView;
+                return prev >= maxIndex ? 0 : prev + 1;
             });
         }, 5000); // Posune každých 5 sekund
 
@@ -59,20 +57,16 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
     const goToPrevious = () => {
         setIsAutoPlaying(false);
         setCurrentIndex((prev) => {
-            const totalPages = Math.ceil(reviews.length / itemsPerView);
-            const currentPage = Math.floor(prev / itemsPerView);
-            const prevPage = currentPage === 0 ? totalPages - 1 : currentPage - 1;
-            return prevPage * itemsPerView;
+            const maxIndex = reviews.length - itemsPerView;
+            return prev === 0 ? maxIndex : prev - 1;
         });
     };
 
     const goToNext = () => {
         setIsAutoPlaying(false);
         setCurrentIndex((prev) => {
-            const totalPages = Math.ceil(reviews.length / itemsPerView);
-            const currentPage = Math.floor(prev / itemsPerView);
-            const nextPage = (currentPage + 1) % totalPages;
-            return nextPage * itemsPerView;
+            const maxIndex = reviews.length - itemsPerView;
+            return prev >= maxIndex ? 0 : prev + 1;
         });
     };
 
@@ -97,20 +91,20 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
             </div>
 
             {/* Carousel Container */}
-            <div className="relative overflow-hidden">
+            <div className="relative">
                 {/* Navigation Buttons */}
                 {reviews.length > itemsPerView && (
                     <>
                         <button
                             onClick={goToPrevious}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all -ml-4"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all"
                             aria-label="Previous reviews"
                         >
                             <ChevronLeft size={24} />
                         </button>
                         <button
                             onClick={goToNext}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all -mr-4"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all"
                             aria-label="Next reviews"
                         >
                             <ChevronRight size={24} />
@@ -118,16 +112,20 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                     </>
                 )}
 
-                {/* Reviews Grid - Zobrazujeme pouze aktuální stránku */}
-                <div className="px-2">
-                    <div className={`grid gap-6 ${
-                        itemsPerView === 1 ? 'grid-cols-1' :
-                        itemsPerView === 2 ? 'grid-cols-2' :
-                        itemsPerView === 3 ? 'grid-cols-3' :
-                        'grid-cols-4'
-                    }`}>
-                        {reviews.slice(currentIndex, currentIndex + itemsPerView).map((review) => (
-                            <div key={review.id} className="w-full">
+                {/* Reviews Grid - Plynulá slideshow */}
+                <div className="overflow-hidden">
+                    <div
+                        className="flex transition-transform duration-700 ease-in-out"
+                        style={{
+                            transform: `translateX(-${(currentIndex / itemsPerView) * 100}%)`,
+                        }}
+                    >
+                        {reviews.map((review) => (
+                            <div
+                                key={review.id}
+                                className="flex-shrink-0 px-3"
+                                style={{ width: `${100 / itemsPerView}%` }}
+                            >
                                 <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 hover:border-gray-700 transition-all h-full flex flex-col">
                                     {/* Rating Stars */}
                                     <div className="flex items-center gap-1 mb-3">
@@ -159,16 +157,16 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                 {/* Dots Indicator */}
                 {reviews.length > itemsPerView && (
                     <div className="flex justify-center gap-2 mt-6">
-                        {[...Array(Math.ceil(reviews.length / itemsPerView))].map((_, pageIndex) => (
+                        {[...Array(reviews.length - itemsPerView + 1)].map((_, index) => (
                             <button
-                                key={pageIndex}
+                                key={index}
                                 onClick={() => {
-                                    setCurrentIndex(pageIndex * itemsPerView);
+                                    setCurrentIndex(index);
                                     setIsAutoPlaying(false);
                                 }}
-                                className={`w-2 h-2 rounded-full transition-all ${currentIndex === pageIndex * itemsPerView ? 'bg-blue-500 w-8' : 'bg-gray-600 hover:bg-gray-500'
+                                className={`w-2 h-2 rounded-full transition-all ${currentIndex === index ? 'bg-blue-500 w-8' : 'bg-gray-600 hover:bg-gray-500'
                                     }`}
-                                aria-label={`Go to page ${pageIndex + 1}`}
+                                aria-label={`Go to position ${index + 1}`}
                             />
                         ))}
                     </div>
