@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper funkce pro validaci dat
+    function isValidSkin(skin) {
+      return skin.keys().hasAll(['assetId', 'name', 'wear', 'imageUrl', 'inInventory', 'isVisible', 'updatedAt'])
+        && skin.assetId is string
+        && skin.name is string
+        && skin.wear is string
+        && skin.imageUrl is string
+        && skin.inInventory is bool
+        && skin.isVisible is bool
+        && skin.updatedAt is timestamp;
+    }
+    
+    // Kolekce skins
+    match /skins/{skinId} {
+      // Čtení: Všichni mohou číst pouze viditelné skiny
+      allow read: if resource.data.isVisible == true;
+      
+      // Admin čtení: Pokud implementujete autentizaci, můžete přidat:
+      // allow read: if request.auth != null && request.auth.token.admin == true;
+      
+      // Zápis: Pouze z backendu (server-side)
+      // Pro development můžete povolit zápis všem, ale v produkci to ZAKAŽTE
+      allow write: if false;
+      
+      // Pokud chcete povolit zápis pouze autentizovaným adminům:
+      // allow write: if request.auth != null && request.auth.token.admin == true && isValidSkin(request.resource.data);
+    }
+
+    // Kolekce reviews
+    // Kolekce reviews
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Defaultně zakázat vše ostatní
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
