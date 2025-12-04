@@ -165,14 +165,43 @@ export default function SkinDetailPage() {
                         </div>
 
                         {/* Price - Always First */}
-                        <div className="bg-blue-600 text-white rounded-xl p-6 shadow-lg">
-                            <div className="flex items-center gap-3 mb-2">
-                                <DollarSign size={24} />
-                                <span className="text-lg font-medium">Cena</span>
+                        <div className="bg-gray-900 text-white rounded-xl p-6 shadow-lg border border-gray-800">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <DollarSign size={24} className="text-gray-400" />
+                                <span className="text-lg font-medium text-gray-400">Cena</span>
                             </div>
-                            <div className="text-4xl font-bold">
+                            <div className="text-4xl font-bold mb-4 text-center">
                                 {skin.price ? `${skin.price} Kč` : 'na dotaz'}
                             </div>
+
+                            {/* Tradable/Marketable Status */}
+                            {(skin.tradable !== undefined || skin.marketable !== undefined) && (
+                                <div className="pt-4 border-t border-gray-800">
+                                    <div className="flex flex-wrap gap-2 justify-center">
+                                        {skin.tradable && !skin.tradeRestrictionDate && (
+                                            <span className="bg-green-900/50 text-green-400 px-3 py-1.5 rounded text-xs font-medium border border-green-700">
+                                                ✅ Lze vyměnit
+                                            </span>
+                                        )}
+                                        {skin.marketable && (
+                                            <span className="bg-blue-900/50 text-blue-400 px-3 py-1.5 rounded text-xs font-medium border border-blue-700">
+                                                💰 Lze prodat
+                                            </span>
+                                        )}
+                                        {!skin.tradable && skin.tradable !== undefined && !skin.tradeRestrictionDate && (
+                                            <span className="bg-red-900/50 text-red-400 px-3 py-1.5 rounded text-xs font-medium border border-red-700">
+                                                🔒 Nelze vyměnit
+                                            </span>
+                                        )}
+                                        {/* Trade Restriction - Combined with lock icon */}
+                                        {skin.tradeRestrictionDate && (
+                                            <span className="bg-red-900/50 text-red-400 px-3 py-1.5 rounded text-xs font-medium border border-red-700">
+                                                🔒 Nelze vyměnit - Obchodovatelné od: {skin.tradeRestrictionDate}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
 
@@ -336,28 +365,6 @@ export default function SkinDetailPage() {
                                     <div className="text-gray-300">{skin.description}</div>
                                 </div>
                             )}
-
-                            {/* Tradable/Marketable Status */}
-                            <div className="pt-4 border-t border-gray-800">
-                                <div className="text-gray-400 text-sm mb-2 font-medium">Status</div>
-                                <div className="flex flex-wrap gap-2">
-                                    {skin.tradable && (
-                                        <span className="bg-green-900/50 text-green-400 px-3 py-1.5 rounded text-xs font-medium border border-green-700">
-                                            ✅ Lze vyměnit
-                                        </span>
-                                    )}
-                                    {skin.marketable && (
-                                        <span className="bg-blue-900/50 text-blue-400 px-3 py-1.5 rounded text-xs font-medium border border-blue-700">
-                                            💰 Lze prodat
-                                        </span>
-                                    )}
-                                    {!skin.tradable && (
-                                        <span className="bg-red-900/50 text-red-400 px-3 py-1.5 rounded text-xs font-medium border border-red-700">
-                                            🔒 Nelze vyměnit
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

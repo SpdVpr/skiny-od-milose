@@ -169,6 +169,17 @@ export default function InventoryTable() {
                 updateData.inspectLink = editingSkin.inspectLink;
             }
 
+            // Market info
+            if (editingSkin.tradable !== undefined) {
+                updateData.tradable = editingSkin.tradable;
+            }
+            if (editingSkin.marketable !== undefined) {
+                updateData.marketable = editingSkin.marketable;
+            }
+            if (editingSkin.tradeRestrictionDate) {
+                updateData.tradeRestrictionDate = editingSkin.tradeRestrictionDate;
+            }
+
             await updateDoc(doc(db, 'skins', editingSkin.assetId), updateData);
 
             setSkins(prev => prev.map(s =>
