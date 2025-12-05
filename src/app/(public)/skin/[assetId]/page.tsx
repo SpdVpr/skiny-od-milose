@@ -96,8 +96,8 @@ export default function SkinDetailPage() {
                             2. Jinak: Custom Screenshot OR Steam Image
                         */}
                         <div
-                            className="bg-[#0d0d0e] rounded-2xl p-1 shadow-lg border border-[#0d0d0e] overflow-hidden flex flex-col justify-start"
-                            style={{ maxHeight: '700px' }}
+                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start"
+                            style={{ maxHeight: '864px' }}
                         >
                             {skin.detailImageUrl ? (
                                 <>
