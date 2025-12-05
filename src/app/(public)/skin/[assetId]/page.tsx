@@ -96,7 +96,7 @@ export default function SkinDetailPage() {
                             2. Jinak: Custom Screenshot OR Steam Image
                         */}
                         <div
-                            className="bg-gray-900 rounded-2xl p-1 shadow-lg border-t-4 border border-gray-800 overflow-hidden h-full flex flex-col justify-center"
+                            className="bg-[#0d0d0e] rounded-2xl p-1 shadow-lg border-t-4 border border-[#0d0d0e] overflow-hidden h-full flex flex-col justify-center"
                             style={{
                                 borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : '#3b82f6'
                             }}
@@ -154,7 +154,7 @@ export default function SkinDetailPage() {
                         </div>
 
                         {/* Price - Always First */}
-                        <div className="bg-gray-900 text-white rounded-xl p-6 shadow-lg border border-gray-800">
+                        <div className="bg-[#0d0d0e] text-white rounded-xl p-6 shadow-lg border border-[#0d0d0e]">
                             <div className="flex items-center justify-center gap-3 mb-2">
                                 <DollarSign size={24} className="text-gray-400" />
                                 <span className="text-lg font-medium text-gray-400">Cena</span>
@@ -170,7 +170,7 @@ export default function SkinDetailPage() {
                                     new Date(skin.tradeRestrictionDate) > new Date();
 
                                 return (
-                                    <div className="pt-4 border-t border-gray-800">
+                                    <div className="pt-4 border-t border-[#0d0d0e]">
                                         <div className="flex flex-wrap gap-2 justify-center">
                                             {/* Show trade lock if restriction date is in the future */}
                                             {isTradeRestricted ? (
@@ -209,7 +209,7 @@ export default function SkinDetailPage() {
 
                         {/* Doppler Phase (pokud je to doppler) */}
                         {skin.dopplerPhase && (
-                            <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+                            <div className="bg-[#0d0d0e] rounded-xl p-4 border border-[#0d0d0e]">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="text-2xl">💎</span>
                                     <span className="text-sm font-medium text-gray-400">Doppler Phase</span>
@@ -225,7 +225,7 @@ export default function SkinDetailPage() {
 
                         {/* Stickers Detail (if any) */}
                         {skin.stickers && skin.stickers.length > 0 && (
-                            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                            <div className="bg-[#0d0d0e] rounded-xl p-6 border border-gray-800">
                                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                                     <Shield size={20} className="text-gray-400" />
                                     Stickery ({skin.stickers.length})
@@ -234,7 +234,7 @@ export default function SkinDetailPage() {
                                     {skin.stickers.map((sticker, idx) => (
                                         <div
                                             key={idx}
-                                            className="bg-gray-800 rounded-lg p-4 border border-gray-700"
+                                            className="bg-gray-800 rounded-lg p-4 border border-[#0d0d0e]"
                                         >
                                             <div className="flex items-center gap-3 mb-2">
                                                 {/* Sticker Image */}

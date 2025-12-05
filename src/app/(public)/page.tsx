@@ -180,7 +180,7 @@ export default function HomePage() {
             {/* Hero Section - Představení + Kontakt */}
             <section className="py-6 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="bg-[#364153] rounded-3xl p-6 lg:p-8 border border-gray-700 shadow-2xl">
+                    <div className="bg-[#0d0d0e] rounded-3xl p-6 lg:p-8 border border-[#0d0d0e] shadow-2xl">
                         <div className="text-center max-w-3xl mx-auto">
                             <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
                                 Vítejte v obchodě s CS:GO skiny
@@ -237,7 +237,7 @@ export default function HomePage() {
                             placeholder="Hledej..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-2.5 bg-[#364153] border border-gray-800 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-all"
+                            className="w-full pl-12 pr-4 py-2.5 bg-[#0d0d0e] border border-[#0d0d0e] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-all"
                         />
                     </div>
 
@@ -249,7 +249,7 @@ export default function HomePage() {
                                 onClick={() => setSelectedCategory(category.id)}
                                 className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
                                     ? 'bg-gray-200 text-gray-900 shadow-lg shadow-white/10'
-                                    : 'bg-[#364153] text-gray-300 border border-gray-800 hover:border-gray-700 hover:bg-gray-800'
+                                    : 'bg-[#0d0d0e] text-gray-300 border border-[#0d0d0e] hover:border-[#0d0d0e] hover:bg-gray-800'
                                     }`}
                             >
                                 <span>{category.name}</span>
@@ -265,7 +265,7 @@ export default function HomePage() {
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                             {[...Array(12)].map((_, i) => (
-                                <div key={i} className="h-96 bg-[#364153] rounded-2xl animate-pulse border border-gray-800" />
+                                <div key={i} className="h-96 bg-[#0d0d0e] rounded-2xl animate-pulse border border-[#0d0d0e]" />
                             ))}
                         </div>
                     ) : filteredSkins.length > 0 ? (
@@ -287,7 +287,7 @@ export default function HomePage() {
             </section>
 
             {/* Footer */}
-            <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-900">
+            <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-[#0d0d0e]">
                 <div className="max-w-7xl mx-auto text-center">
                     <p className="text-gray-500 text-sm">
                         © 2024 Skiny od Miloše. Všechna práva vyhrazena.

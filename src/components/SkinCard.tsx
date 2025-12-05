@@ -20,7 +20,7 @@ export default function SkinCard({ skin }: SkinProps) {
     return (
         <div
             onClick={handleCardClick}
-            className="group bg-[#364153] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-800 hover:border-gray-700 flex flex-col cursor-pointer relative overflow-hidden"
+            className="group bg-[#0d0d0e] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#0d0d0e] hover:border-[#0d0d0e] flex flex-col cursor-pointer relative overflow-hidden"
             style={{
                 borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : undefined,
                 borderTopWidth: skin.rarityColor ? '3px' : undefined,
@@ -45,6 +45,19 @@ export default function SkinCard({ skin }: SkinProps) {
 
 
 
+                {/* StatTrak Badge - Top Left */}
+                {skin.name.includes('StatTrak™') && (
+                    <div className="absolute top-2 left-2 bg-orange-500/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
+                        StatTrak™
+                    </div>
+                )}
+
+                {/* Wear Badge - Top Right */}
+                {skin.wear && (
+                    <div className="absolute top-2 right-2 bg-gray-900/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
+                        {SkinUtils.translateWear(skin.wear)}
+                    </div>
+                )}
 
                 {/* Name Tag Badge */}
                 {skin.nameTag && (
@@ -74,9 +87,17 @@ export default function SkinCard({ skin }: SkinProps) {
                                 <h3 className="font-bold text-white text-sm opacity-90 leading-tight">
                                     {cleanName.split('|')[0].trim()}
                                 </h3>
-                                <h4 className="font-bold text-white text-lg leading-tight">
+                                <h4 className="text-white text-base leading-tight mb-2">
                                     {cleanName.split('|')[1].trim()}
                                 </h4>
+                                <div className="flex gap-4 text-xs text-white opacity-90">
+                                    {skin.floatValue !== undefined && (
+                                        <span>Float: {SkinUtils.formatFloat(skin.floatValue)}</span>
+                                    )}
+                                    {skin.paintSeed !== undefined && (
+                                        <span>Pattern: {skin.paintSeed}</span>
+                                    )}
+                                </div>
                             </>
                         ) : (
                             <h3 className="font-bold text-white text-lg leading-tight">
@@ -87,6 +108,6 @@ export default function SkinCard({ skin }: SkinProps) {
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 }

@@ -8,11 +8,11 @@ interface SkinStatsProps {
 
 export default function SkinStats({ skin }: SkinStatsProps) {
   return (
-    <div className="bg-gray-900 rounded-xl p-4 space-y-3 border border-gray-800">
+    <div className="bg-[#0d0d0e] rounded-xl p-4 space-y-3 border border-[#0d0d0e]">
       {/* Float Value */}
       {skin.floatValue !== undefined && (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-700">
+          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-[#0d0d0e]">
             <TrendingUp className="text-gray-400" size={20} />
           </div>
           <div className="flex-1">
@@ -37,7 +37,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
       {/* Pattern Seed */}
       {skin.paintSeed !== undefined && (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-700">
+          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-[#0d0d0e]">
             <Hash className="text-gray-400" size={20} />
           </div>
           <div className="flex-1">
@@ -73,7 +73,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
       {/* Name Tag */}
       {skin.nameTag && (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-700">
+          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-[#0d0d0e]">
             <Tag className="text-gray-400" size={20} />
           </div>
           <div className="flex-1">
@@ -85,7 +85,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
 
       {/* Stickers */}
       {skin.stickers && skin.stickers.length > 0 && (
-        <div className="pt-2 border-t border-gray-800">
+        <div className="pt-2 border-t border-[#0d0d0e]">
           <div className="text-xs text-gray-400 font-medium mb-2 flex items-center gap-2">
             <Shield size={14} />
             Stickery ({skin.stickers.length})
@@ -94,7 +94,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
             {skin.stickers.map((sticker, idx) => (
               <div
                 key={idx}
-                className="bg-gray-800 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-300 border border-gray-700"
+                className="bg-gray-800 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-300 border border-[#0d0d0e]"
               >
                 Pozice {sticker.position}
               </div>
@@ -105,7 +105,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
 
       {/* Collection */}
       {skin.collection && (
-        <div className="pt-2 border-t border-gray-800">
+        <div className="pt-2 border-t border-[#0d0d0e]">
           <div className="text-xs text-gray-400 font-medium">Kolekce</div>
           <div className="text-sm font-medium text-gray-300 mt-1">{skin.collection}</div>
         </div>
@@ -113,7 +113,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
 
       {/* Tournament */}
       {(skin.tournament || skin.tournamentTeam) && (
-        <div className="pt-2 border-t border-gray-800">
+        <div className="pt-2 border-t border-[#0d0d0e]">
           <div className="text-xs text-gray-400 font-medium mb-1">Tournament</div>
           {skin.tournament && (
             <div className="text-sm font-medium text-gray-300">{skin.tournament}</div>
