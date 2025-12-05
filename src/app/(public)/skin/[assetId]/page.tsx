@@ -78,17 +78,17 @@ export default function SkinDetailPage() {
 
     return (
         <div className="min-h-screen bg-black">
-            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-hidden" style={{ maxWidth: '1500px', maxHeight: '1050px' }}>
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden" style={{ maxWidth: '1500px', maxHeight: '950px' }}>
                 {/* Back Button */}
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+                    className="flex items-center gap-2 text-gray-400 hover:text-white mb-3 transition-colors"
                 >
                     <ArrowLeft size={20} />
                     Zpět
                 </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 h-full">
                     {/* Left Column - Images */}
                     <div className="space-y-4">
                         {/* Main Image - Logika:
@@ -96,28 +96,28 @@ export default function SkinDetailPage() {
                             2. Jinak: Custom Screenshot OR Steam Image
                         */}
                         <div
-                            className="bg-[#0d0d0e] rounded-2xl p-1 shadow-lg border-t-4 border border-[#0d0d0e] overflow-hidden h-full flex flex-col justify-center"
-                            style={{
-                                borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : '#3b82f6'
-                            }}
+                            className="bg-[#0d0d0e] rounded-2xl p-1 shadow-lg border border-[#0d0d0e] overflow-hidden flex flex-col justify-start"
+                            style={{ maxHeight: '700px' }}
                         >
                             {skin.detailImageUrl ? (
                                 <>
-                                    <div className="flex-1 min-h-0 flex items-center justify-center">
+                                    <div className="flex-1 min-h-0 flex items-start justify-center">
                                         <img
                                             src={skin.detailImageUrl}
                                             alt={`${skin.name} - Detail`}
-                                            className="max-w-full max-h-full object-contain rounded-lg"
+                                            className="h-full object-cover object-top rounded-lg"
+                                            style={{ width: '70%' }}
                                         />
                                     </div>
                                 </>
                             ) : skin.customScreenshotUrl ? (
                                 <>
-                                    <div className="flex-1 min-h-0 flex items-center justify-center">
+                                    <div className="flex-1 min-h-0 flex items-start justify-center">
                                         <img
                                             src={skin.customScreenshotUrl}
                                             alt={`${skin.name} - Screenshot ze hry`}
-                                            className="max-w-full max-h-full object-contain rounded-lg"
+                                            className="h-full object-cover object-top rounded-lg"
+                                            style={{ width: '70%' }}
                                         />
                                     </div>
                                 </>
@@ -128,7 +128,7 @@ export default function SkinDetailPage() {
                                         className="w-full h-full"
                                         showStickers={true}
                                         cropTop={0}
-                                        imageObjectFit="contain"
+                                        imageObjectFit="cover"
                                         imageObjectPosition="center center"
                                     />
                                 </div>
@@ -139,13 +139,10 @@ export default function SkinDetailPage() {
                     </div>
 
                     {/* Right Column - Info */}
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                         {/* Title */}
                         <div>
-                            <h1
-                                className="text-4xl font-bold mb-2"
-                                style={{ color: skin.nameColor ? `#${skin.nameColor}` : '#ffffff' }}
-                            >
+                            <h1 className="text-2xl font-bold mb-1 text-white">
                                 {skin.name}
                             </h1>
                             {skin.marketHashName && skin.marketHashName !== skin.name && (
@@ -154,12 +151,12 @@ export default function SkinDetailPage() {
                         </div>
 
                         {/* Price - Always First */}
-                        <div className="bg-[#0d0d0e] text-white rounded-xl p-6 shadow-lg border border-[#0d0d0e]">
+                        <div className="bg-[#0d0d0e] text-white rounded-xl p-3 shadow-lg border border-[#0d0d0e]">
                             <div className="flex items-center justify-center gap-3 mb-2">
                                 <DollarSign size={24} className="text-gray-400" />
                                 <span className="text-lg font-medium text-gray-400">Cena</span>
                             </div>
-                            <div className="text-4xl font-bold mb-4 text-center">
+                            <div className="text-2xl font-bold mb-2 text-center">
                                 {skin.price ? `${skin.price} Kč` : 'na dotaz'}
                             </div>
 

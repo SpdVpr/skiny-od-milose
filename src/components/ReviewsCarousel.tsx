@@ -119,7 +119,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                 className="flex-shrink-0 px-3"
                                 style={{ width: `${100 / itemsPerView}%` }}
                             >
-                                <div className="bg-[#0d0d0e] rounded-2xl p-6 border border-[#0d0d0e] hover:border-[#0d0d0e] transition-all h-full flex flex-col">
+                                <div className="bg-[#161616] rounded-2xl p-6 border border-[#161616] hover:border-[#161616] transition-all h-full flex flex-col">
                                     {/* Rating Stars */}
                                     <div className="flex items-center gap-1 mb-3">
                                         {[...Array(5)].map((_, i) => (
@@ -137,7 +137,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                     </p>
 
                                     {/* Author & Date */}
-                                    <div className="text-xs text-gray-500 border-t border-[#0d0d0e] pt-3">
+                                    <div className="text-xs text-gray-500 border-t border-[#161616] pt-3">
                                         <div className="font-semibold text-gray-400">{review.author}</div>
                                         <div>{new Date(review.date).toLocaleDateString('cs-CZ')}</div>
                                     </div>

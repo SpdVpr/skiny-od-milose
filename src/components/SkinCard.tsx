@@ -20,7 +20,7 @@ export default function SkinCard({ skin }: SkinProps) {
     return (
         <div
             onClick={handleCardClick}
-            className="group bg-[#0d0d0e] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#0d0d0e] hover:border-[#0d0d0e] flex flex-col cursor-pointer relative overflow-hidden"
+            className="group bg-[#161616] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#161616] hover:border-[#161616] flex flex-col cursor-pointer relative overflow-hidden"
             style={{
                 borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : undefined,
                 borderTopWidth: skin.rarityColor ? '3px' : undefined,

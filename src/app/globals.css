@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'SF Orson Casual';
+  src: url('/SF Orson Casual Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
