@@ -81,14 +81,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
     return (
         <div className="relative">
             {/* Nadpis */}
-            <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-3 mb-2">
-                    <Star className="text-yellow-400 fill-yellow-400" size={28} />
-                    <h2 className="text-3xl font-bold text-white">Reputace</h2>
-                    <Star className="text-yellow-400 fill-yellow-400" size={28} />
-                </div>
-                <p className="text-gray-400">Co o nás říkají naši zákazníci</p>
-            </div>
+
 
             {/* Carousel Container */}
             <div className="relative">
@@ -126,7 +119,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                 className="flex-shrink-0 px-3"
                                 style={{ width: `${100 / itemsPerView}%` }}
                             >
-                                <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 hover:border-gray-700 transition-all h-full flex flex-col">
+                                <div className="bg-[#364153] rounded-2xl p-6 border border-gray-800 hover:border-gray-700 transition-all h-full flex flex-col">
                                     {/* Rating Stars */}
                                     <div className="flex items-center gap-1 mb-3">
                                         {[...Array(5)].map((_, i) => (
@@ -139,7 +132,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                     </div>
 
                                     {/* Review Text */}
-                                    <p className="text-gray-300 text-base font-bold mb-4 flex-1 line-clamp-4">
+                                    <p className="text-gray-300 text-sm mb-6 flex-1 line-clamp-2">
                                         "{review.text}"
                                     </p>
 
@@ -164,7 +157,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                     setCurrentIndex(index);
                                     setIsAutoPlaying(false);
                                 }}
-                                className={`w-2 h-2 rounded-full transition-all ${currentIndex === index ? 'bg-blue-500 w-8' : 'bg-gray-600 hover:bg-gray-500'
+                                className={`w-2 h-2 rounded-full transition-all ${currentIndex === index ? 'bg-white w-8' : 'bg-gray-600 hover:bg-gray-500'
                                     }`}
                                 aria-label={`Go to position ${index + 1}`}
                             />

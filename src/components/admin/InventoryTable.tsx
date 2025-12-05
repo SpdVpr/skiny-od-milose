@@ -11,13 +11,15 @@ import ScreenshotUpload from '@/components/admin/ScreenshotUpload';
 
 // Kategorie zbraní
 const CATEGORIES = [
-    { id: 'all', name: 'Vše', icon: '🎯' },
-    { id: 'rifle', name: 'Pušky', icon: '🔫' },
-    { id: 'pistol', name: 'Pistole', icon: '🔫' },
-    { id: 'sniper', name: 'Sniper', icon: '🎯' },
-    { id: 'smg', name: 'SMG', icon: '💨' },
-    { id: 'knife', name: 'Nože', icon: '🔪' },
-    { id: 'gloves', name: 'Rukavice', icon: '🧤' },
+    { id: 'all', name: 'Vše' },
+    { id: 'rifle', name: 'Pušky' },
+    { id: 'pistol', name: 'Pistole' },
+    { id: 'sniper', name: 'Odstřelovací pušky' },
+    { id: 'smg', name: 'Samopaly' },
+    { id: 'knife', name: 'Nože' },
+    { id: 'gloves', name: 'Rukavice' },
+    { id: 'agent', name: 'Agenti' },
+    { id: 'other', name: 'Ostatní' },
 ];
 
 export default function InventoryTable() {
@@ -133,6 +135,38 @@ export default function InventoryTable() {
         } catch (error) {
             console.error('Bulk update error:', error);
             toast.error('Chyba při hromadné aktualizaci');
+        } finally {
+            setIsBulkUpdating(false);
+        }
+    };
+
+    const bulkUpdateCategory = async (category: string) => {
+        if (!category || category === 'all') return;
+        if (selectedSkins.size === 0) {
+            toast.error('Nevybrali jste žádné skiny');
+            return;
+        }
+
+        setIsBulkUpdating(true);
+        try {
+            const batch = writeBatch(db);
+
+            selectedSkins.forEach(assetId => {
+                const skinRef = doc(db, 'skins', assetId);
+                batch.update(skinRef, { category });
+            });
+
+            await batch.commit();
+
+            setSkins(prev => prev.map(skin =>
+                selectedSkins.has(skin.assetId) ? { ...skin, category } : skin
+            ));
+
+            toast.success(`Kategorie změněna pro ${selectedSkins.size} skinů`);
+            setSelectedSkins(new Set());
+        } catch (error) {
+            console.error('Bulk category update error:', error);
+            toast.error('Chyba při změně kategorie');
         } finally {
             setIsBulkUpdating(false);
         }
@@ -354,6 +388,22 @@ export default function InventoryTable() {
         }
     };
 
+    // Mapování Steam kategorií na naše kategorie (zkopírováno z page.tsx pro konzistenci)
+    const mapSteamCategory = (steamCategory: string): string => {
+        const lower = steamCategory.toLowerCase();
+        if (lower === 'melee' || lower === 'knife') return 'knife';
+        if (lower === 'pistol') return 'pistol';
+        if (lower === 'rifle') return 'rifle';
+        if (lower === 'sniper rifle' || lower === 'sniperrifle') return 'sniper';
+        if (lower === 'smg' || lower === 'submachine gun') return 'smg';
+        if (lower === 'gloves') return 'gloves';
+        if (lower === 'agent') return 'agent';
+        // Pokud je to naše interní ID (např. 'other', 'agent'), vrátíme ho
+        if (CATEGORIES.some(c => c.id === lower)) return lower;
+
+        return 'other';
+    };
+
     // Funkce pro určení kategorie podle názvu zbraně
     const getCategoryFromName = (name: string): string => {
         const lowerName = name.toLowerCase();
@@ -389,12 +439,34 @@ export default function InventoryTable() {
         if (lowerName.includes('gloves') || lowerName.includes('rukavice')) {
             return 'gloves';
         }
-        return 'all';
+        if (lowerName.includes('agent') || lowerName.includes('sir') || lowerName.includes('doctor') ||
+            lowerName.includes('commander')) { // Basic agent checks
+            return 'agent';
+        }
+        return 'other';
     };
 
     const filteredSkins = skins.filter(skin => {
         const matchesSearch = skin.name.toLowerCase().includes(filter.toLowerCase());
-        const skinCategory = getCategoryFromName(skin.name);
+
+        // Určení kategorie (priorita: manuálně nastavená -> steam kategorie -> podle názvu)
+        let skinCategory = '';
+
+        if (skin.category) {
+            skinCategory = mapSteamCategory(skin.category);
+        }
+
+        if (!skinCategory || skinCategory === 'other') {
+            // Pokud nemáme kategorii nebo je 'other', zkusíme ještě detekci z názvu, 
+            // ale pouze pokud detekce najde něco konkrétního (ne 'other')
+            const nameCategory = getCategoryFromName(skin.name);
+            if (nameCategory !== 'other') {
+                skinCategory = nameCategory;
+            } else if (!skinCategory) {
+                skinCategory = 'other';
+            }
+        }
+
         const matchesCategory = selectedCategory === 'all' || skinCategory === selectedCategory;
         return matchesSearch && matchesCategory;
     });
@@ -433,7 +505,7 @@ export default function InventoryTable() {
                     >
                         {CATEGORIES.map(category => (
                             <option key={category.id} value={category.id} className="text-gray-900">
-                                {category.icon} {category.name}
+                                {category.name}
                             </option>
                         ))}
                     </select>
@@ -480,6 +552,29 @@ export default function InventoryTable() {
                         <EyeOff size={16} />
                         Skrýt vybrané ({selectedSkins.size})
                     </button>
+
+                    <div className="h-8 w-px bg-gray-300 mx-2" />
+
+                    <select
+                        onChange={(e) => {
+                            if (e.target.value !== 'default') {
+                                if (confirm(`Opravdu chcete nastavit kategorii "${CATEGORIES.find(c => c.id === e.target.value)?.name}" pro ${selectedSkins.size} skinů?`)) {
+                                    bulkUpdateCategory(e.target.value);
+                                }
+                                e.target.value = 'default';
+                            }
+                        }}
+                        disabled={isBulkUpdating || selectedSkins.size === 0}
+                        className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 text-sm disabled:opacity-50"
+                        defaultValue="default"
+                    >
+                        <option value="default" disabled>Nastavit kategorii...</option>
+                        {CATEGORIES.filter(c => c.id !== 'all').map(category => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
 
                     <div className="h-8 w-px bg-gray-300 mx-2" />
 
@@ -760,13 +855,11 @@ export default function InventoryTable() {
                                     onChange={(e) => setEditingSkin({ ...editingSkin, category: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
                                 >
-                                    <option value="rifle">🔫 Pušky (Rifle)</option>
-                                    <option value="pistol">🔫 Pistole (Pistol)</option>
-                                    <option value="sniper">🎯 Sniper</option>
-                                    <option value="smg">💨 SMG</option>
-                                    <option value="knife">🔪 Nože (Knife)</option>
-                                    <option value="gloves">🧤 Rukavice (Gloves)</option>
-                                    <option value="other">📦 Ostatní</option>
+                                    {CATEGORIES.filter(c => c.id !== 'all').map(category => (
+                                        <option key={category.id} value={category.id}>
+                                            {category.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 

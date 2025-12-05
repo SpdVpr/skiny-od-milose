@@ -8,6 +8,8 @@ interface SkinImageWithStickersProps {
   className?: string;
   showStickers?: boolean;
   cropTop?: number; // Počet pixelů k ořezu z horní části obrázku
+  imageObjectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  imageObjectPosition?: string;
 }
 
 /**
@@ -18,7 +20,9 @@ export default function SkinImageWithStickers({
   skin,
   className = '',
   showStickers = true,
-  cropTop = 0
+  cropTop = 0,
+  imageObjectFit = 'cover',
+  imageObjectPosition = 'center 35%'
 }: SkinImageWithStickersProps) {
   const [stickerImages, setStickerImages] = useState<Record<string, string>>({});
   const [imageError, setImageError] = useState(false);
@@ -133,9 +137,10 @@ export default function SkinImageWithStickers({
         <img
           src={baseImageUrl}
           alt={skin.name || 'Skin'}
-          className="w-full h-full object-cover"
+          className="w-full h-full"
           style={{
-            objectPosition: 'center 35%',
+            objectFit: imageObjectFit,
+            objectPosition: imageObjectPosition,
             zIndex: 2
           }}
           onError={(e) => {
@@ -150,56 +155,56 @@ export default function SkinImageWithStickers({
         {showStickers && skin.stickers && skin.stickers.length > 0 && (
           <>
             {skin.stickers.map((sticker, index) => {
-            const stickerUrl = stickerImages[sticker.classId];
-            if (!stickerUrl) {
-              console.log('⚠️ [SkinImageWithStickers] Sticker URL chybí:', sticker);
-              return null;
-            }
+              const stickerUrl = stickerImages[sticker.classId];
+              if (!stickerUrl) {
+                console.log('⚠️ [SkinImageWithStickers] Sticker URL chybí:', sticker);
+                return null;
+              }
 
-            const position = getStickerPosition(sticker.position, skin.weaponType);
+              const position = getStickerPosition(sticker.position, skin.weaponType);
 
-            console.log('🎯 [SkinImageWithStickers] Renderuji sticker:', {
-              index,
-              classId: sticker.classId,
-              position: sticker.position,
-              cssPosition: position,
-              url: stickerUrl
-            });
+              console.log('🎯 [SkinImageWithStickers] Renderuji sticker:', {
+                index,
+                classId: sticker.classId,
+                position: sticker.position,
+                cssPosition: position,
+                url: stickerUrl
+              });
 
-            return (
-              <div
-                key={`${sticker.classId}-${index}`}
-                className="absolute pointer-events-none"
-                style={{
-                  left: position.left,
-                  top: position.top,
-                  width: position.size,
-                  height: position.size,
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 10,
-                  border: '2px solid red', // DEBUG: Červený border pro viditelnost
-                }}
-              >
-                <img
-                  src={stickerUrl}
-                  alt={sticker.name || `Sticker ${index + 1}`}
-                  className="w-full h-full object-contain drop-shadow-lg"
+              return (
+                <div
+                  key={`${sticker.classId}-${index}`}
+                  className="absolute pointer-events-none"
                   style={{
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                    left: position.left,
+                    top: position.top,
+                    width: position.size,
+                    height: position.size,
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10,
+                    border: '2px solid red', // DEBUG: Červený border pro viditelnost
                   }}
-                  onLoad={() => {
-                    console.log('✅ [SkinImageWithStickers] Sticker načten:', stickerUrl);
-                  }}
-                  onError={(e) => {
-                    console.error('❌ [SkinImageWithStickers] Sticker se nepodařilo načíst:', stickerUrl);
-                    // Skryjeme sticker pokud se nepodaří načíst
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            );
-          })}
-        </>
+                >
+                  <img
+                    src={stickerUrl}
+                    alt={sticker.name || `Sticker ${index + 1}`}
+                    className="w-full h-full object-contain drop-shadow-lg"
+                    style={{
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                    }}
+                    onLoad={() => {
+                      console.log('✅ [SkinImageWithStickers] Sticker načten:', stickerUrl);
+                    }}
+                    onError={(e) => {
+                      console.error('❌ [SkinImageWithStickers] Sticker se nepodařilo načíst:', stickerUrl);
+                      // Skryjeme sticker pokud se nepodaří načíst
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </>
         )}
       </div>
     </div>

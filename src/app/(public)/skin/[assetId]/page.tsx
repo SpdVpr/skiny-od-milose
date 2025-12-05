@@ -66,7 +66,7 @@ export default function SkinDetailPage() {
                     <p className="text-gray-400 mb-8">{error || 'Tento skin neexistuje'}</p>
                     <button
                         onClick={() => router.push('/')}
-                        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
+                        className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2 mx-auto"
                     >
                         <ArrowLeft size={20} />
                         Zpět na hlavní stránku
@@ -78,7 +78,7 @@ export default function SkinDetailPage() {
 
     return (
         <div className="min-h-screen bg-black">
-            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12" style={{ maxWidth: '1500px' }}>
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-hidden" style={{ maxWidth: '1500px', maxHeight: '1050px' }}>
                 {/* Back Button */}
                 <button
                     onClick={() => router.back()}
@@ -88,7 +88,7 @@ export default function SkinDetailPage() {
                     Zpět
                 </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 h-full">
                     {/* Left Column - Images */}
                     <div className="space-y-4">
                         {/* Main Image - Logika:
@@ -96,52 +96,41 @@ export default function SkinDetailPage() {
                             2. Jinak: Custom Screenshot OR Steam Image
                         */}
                         <div
-                            className="bg-gray-900 rounded-2xl p-3 shadow-lg border-t-4 border border-gray-800 overflow-hidden"
+                            className="bg-gray-900 rounded-2xl p-1 shadow-lg border-t-4 border border-gray-800 overflow-hidden h-full flex flex-col justify-center"
                             style={{
                                 borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : '#3b82f6'
                             }}
                         >
                             {skin.detailImageUrl ? (
                                 <>
-                                    <div className="text-xs text-gray-400 font-bold mb-2 text-center uppercase tracking-wide">
-                                        📸 Detail produktu
+                                    <div className="flex-1 min-h-0 flex items-center justify-center">
+                                        <img
+                                            src={skin.detailImageUrl}
+                                            alt={`${skin.name} - Detail`}
+                                            className="max-w-full max-h-full object-contain rounded-lg"
+                                        />
                                     </div>
-                                    <img
-                                        src={skin.detailImageUrl}
-                                        alt={`${skin.name} - Detail`}
-                                        className="w-full h-auto object-contain rounded-lg"
-                                    />
                                 </>
                             ) : skin.customScreenshotUrl ? (
                                 <>
-                                    <div className="text-xs text-gray-400 font-bold mb-2 text-center uppercase tracking-wide">
-                                        🎮 Skutečný vzhled ve hře
+                                    <div className="flex-1 min-h-0 flex items-center justify-center">
+                                        <img
+                                            src={skin.customScreenshotUrl}
+                                            alt={`${skin.name} - Screenshot ze hry`}
+                                            className="max-w-full max-h-full object-contain rounded-lg"
+                                        />
                                     </div>
-                                    <div className="text-xs text-gray-500 mb-2 text-center">
-                                        (S přesným opotřebením, patternem a stickery)
-                                    </div>
-                                    <img
-                                        src={skin.customScreenshotUrl}
-                                        alt={`${skin.name} - Screenshot ze hry`}
-                                        className="w-full h-auto object-contain rounded-lg"
-                                    />
                                 </>
                             ) : (
-                                <div className="relative rounded-lg overflow-hidden">
+                                <div className="relative rounded-lg overflow-hidden h-full flex items-center justify-center w-full">
                                     <SkinImageWithStickers
                                         skin={skin}
-                                        className="w-full h-auto"
+                                        className="w-full h-full"
                                         showStickers={true}
                                         cropTop={0}
+                                        imageObjectFit="contain"
+                                        imageObjectPosition="center center"
                                     />
-                                </div>
-                            )}
-                            {skin.floatValue !== undefined && (
-                                <div className="mt-2 text-center relative z-10">
-                                    <span className="text-xs text-gray-400">Opotřebení: </span>
-                                    <span className="text-sm font-bold text-white">
-                                        {SkinUtils.formatFloat(skin.floatValue)}
-                                    </span>
                                 </div>
                             )}
                         </div>
@@ -216,52 +205,7 @@ export default function SkinDetailPage() {
 
 
 
-                        {/* Float & Pattern - Prominent Display */}
-                        {(skin.floatValue !== undefined || skin.paintSeed !== undefined) && (
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Float Value */}
-                                {skin.floatValue !== undefined && (
-                                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <TrendingUp size={18} className="text-gray-400" />
-                                            <span className="text-sm font-medium text-gray-400">Opotřebení</span>
-                                        </div>
-                                        <div className={`text-2xl font-bold ${SkinUtils.isGoodFloat(skin.floatValue, skin.exterior)
-                                                ? 'text-blue-400'
-                                                : 'text-white'
-                                            }`}>
-                                            {SkinUtils.formatFloat(skin.floatValue)}
-                                        </div>
-                                        {skin.exterior && (
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                Range: {SkinUtils.getWearRange(skin.exterior)}
-                                            </div>
-                                        )}
-                                        {skin.minFloat !== undefined && skin.maxFloat !== undefined && (
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                Min: {skin.minFloat.toFixed(4)} | Max: {skin.maxFloat.toFixed(4)}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Pattern Seed */}
-                                {skin.paintSeed !== undefined && (
-                                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Hash size={18} className="text-gray-400" />
-                                            <span className="text-sm font-medium text-gray-400">Číslo šablony</span>
-                                        </div>
-                                        <div className="text-2xl font-bold text-white">
-                                            #{skin.paintSeed}
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            Pattern Index
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                        {/* Float & Pattern Removed as requested */}
 
                         {/* Doppler Phase (pokud je to doppler) */}
                         {skin.dopplerPhase && (
@@ -325,7 +269,7 @@ export default function SkinDetailPage() {
                         {skin.inspectLink && (
                             <a
                                 href={skin.inspectLink}
-                                className="block bg-blue-600 rounded-2xl p-6 text-white shadow-lg hover:bg-blue-700 transition-all"
+                                className="block bg-gray-700 rounded-2xl p-6 text-white shadow-lg hover:bg-gray-600 transition-all"
                             >
                                 <div className="text-center">
                                     <div className="text-sm font-bold mb-2">
@@ -342,40 +286,7 @@ export default function SkinDetailPage() {
                             </a>
                         )}
 
-                        {/* Additional Info */}
-                        <div className="bg-gray-900 rounded-xl p-6 space-y-4 border border-gray-800">
-                            <h3 className="text-lg font-bold text-white">Další informace</h3>
-
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <div className="text-gray-400">Asset ID</div>
-                                    <div className="font-mono font-medium text-white">{skin.assetId}</div>
-                                </div>
-                                <div>
-                                    <div className="text-gray-400">Class ID</div>
-                                    <div className="font-mono font-medium text-white">{skin.classId}</div>
-                                </div>
-                                {skin.instanceId && (
-                                    <div>
-                                        <div className="text-gray-400">Instance ID</div>
-                                        <div className="font-mono font-medium text-white">{skin.instanceId}</div>
-                                    </div>
-                                )}
-                                {skin.category && (
-                                    <div>
-                                        <div className="text-gray-400">Kategorie</div>
-                                        <div className="font-medium text-white">{skin.category}</div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {skin.description && (
-                                <div className="pt-4 border-t border-gray-800">
-                                    <div className="text-gray-400 text-sm mb-1">Popis</div>
-                                    <div className="text-gray-300">{skin.description}</div>
-                                </div>
-                            )}
-                        </div>
+                        {/* Additional Info Removed as requested */}
                     </div>
                 </div>
             </div>

@@ -5,7 +5,8 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import SkinCard from '@/components/SkinCard';
 import ReviewsCarousel from '@/components/ReviewsCarousel';
-import { Search, Facebook, MessageCircle } from 'lucide-react';
+import { Search, Facebook } from 'lucide-react';
+import Image from 'next/image';
 import { Skin } from '@/types/skin';
 
 interface Review {
@@ -17,14 +18,17 @@ interface Review {
 }
 
 // Kategorie zbraní
+// Kategorie zbraní
 const CATEGORIES = [
-    { id: 'all', name: 'Vše', icon: '🎯' },
-    { id: 'rifle', name: 'Pušky', icon: '🔫' },
-    { id: 'pistol', name: 'Pistole', icon: '🔫' },
-    { id: 'sniper', name: 'Sniper', icon: '🎯' },
-    { id: 'smg', name: 'SMG', icon: '💨' },
-    { id: 'knife', name: 'Nože', icon: '🔪' },
-    { id: 'gloves', name: 'Rukavice', icon: '🧤' },
+    { id: 'all', name: 'Vše' },
+    { id: 'rifle', name: 'Pušky' },
+    { id: 'pistol', name: 'Pistole' },
+    { id: 'sniper', name: 'Odstřelovací pušky' },
+    { id: 'smg', name: 'Samopaly' },
+    { id: 'knife', name: 'Nože' },
+    { id: 'gloves', name: 'Rukavice' },
+    { id: 'agent', name: 'Agenti' },
+    { id: 'other', name: 'Ostatní' },
 ];
 
 export default function HomePage() {
@@ -72,6 +76,7 @@ export default function HomePage() {
     }, []);
 
     // Mapování Steam kategorií na naše kategorie
+    // Mapování Steam kategorií na naše kategorie
     const mapSteamCategory = (steamCategory: string): string => {
         const lower = steamCategory.toLowerCase();
         // Steam API používá různé názvy, musíme je mapovat
@@ -81,7 +86,9 @@ export default function HomePage() {
         if (lower === 'sniper rifle' || lower === 'sniperrifle') return 'sniper';
         if (lower === 'smg' || lower === 'submachine gun') return 'smg';
         if (lower === 'gloves') return 'gloves';
-        return '';
+        if (lower === 'agent') return 'agent';
+        // Add more mappings if needed for "other"
+        return 'other'; // Default to other if no specific match
     };
 
     // Funkce pro určení kategorie podle názvu zbraně
@@ -119,8 +126,13 @@ export default function HomePage() {
         if (lowerName.includes('gloves') || lowerName.includes('rukavice')) {
             return 'gloves';
         }
-        // Pokud nic neodpovídá, vrátíme prázdný string (ne 'all')
-        return '';
+        if (lowerName.includes('agent') || lowerName.includes('sir') || lowerName.includes('doctor') ||
+            lowerName.includes('commander')) { // Basic agent checks
+            return 'agent';
+        }
+
+        // Pokud nic neodpovídá, vrátíme 'other'
+        return 'other';
     };
 
     // Filtrování skinů
@@ -168,7 +180,7 @@ export default function HomePage() {
             {/* Hero Section - Představení + Kontakt */}
             <section className="py-6 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 lg:p-8 border border-gray-700 shadow-2xl">
+                    <div className="bg-[#364153] rounded-3xl p-6 lg:p-8 border border-gray-700 shadow-2xl">
                         <div className="text-center max-w-3xl mx-auto">
                             <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
                                 Vítejte v obchodě s CS:GO skiny
@@ -187,13 +199,19 @@ export default function HomePage() {
                                     Facebook
                                 </a>
                                 <a
-                                    href="https://www.facebook.com/skinyodmilose"
+                                    href="https://steamcommunity.com/id/skinyodmilose"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
                                 >
-                                    <MessageCircle size={18} />
-                                    Kontakt
+                                    <Image
+                                        src="/steam_black_logo_icon_147078.png"
+                                        alt="Steam"
+                                        width={24}
+                                        height={24}
+                                        className="invert select-none pointer-events-none"
+                                    />
+                                    Steam
                                 </a>
                             </div>
                         </div>
@@ -210,31 +228,30 @@ export default function HomePage() {
 
             {/* Filter Section */}
             <section className="py-4 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
+                <div className="mx-auto flex flex-col md:flex-row gap-4 items-center justify-between" style={{ maxWidth: '1500px' }}>
                     {/* Search */}
-                    <div className="relative w-full max-w-2xl mx-auto mb-4">
+                    <div className="relative w-full max-w-xs md:max-w-sm shrink-0">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                         <input
                             type="text"
                             placeholder="Hledej..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-all"
+                            className="w-full pl-12 pr-4 py-2.5 bg-[#364153] border border-gray-800 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-all"
                         />
                     </div>
 
                     {/* Categories */}
-                    <div className="flex flex-wrap justify-center gap-2">
+                    <div className="flex flex-wrap justify-center md:justify-end gap-2 flex-grow">
                         {CATEGORIES.map(category => (
                             <button
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.id)}
                                 className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50'
-                                        : 'bg-gray-900 text-gray-300 border border-gray-800 hover:border-gray-700 hover:bg-gray-800'
+                                    ? 'bg-gray-200 text-gray-900 shadow-lg shadow-white/10'
+                                    : 'bg-[#364153] text-gray-300 border border-gray-800 hover:border-gray-700 hover:bg-gray-800'
                                     }`}
                             >
-                                <span>{category.icon}</span>
                                 <span>{category.name}</span>
                             </button>
                         ))}
@@ -244,15 +261,15 @@ export default function HomePage() {
 
             {/* Products Grid - 7 columns */}
             <section className="py-6 px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto" style={{ maxWidth: '2400px' }}>
+                <div className="mx-auto" style={{ maxWidth: '1500px' }}>
                     {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4">
-                            {[...Array(14)].map((_, i) => (
-                                <div key={i} className="h-96 bg-gray-900 rounded-2xl animate-pulse border border-gray-800" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                            {[...Array(12)].map((_, i) => (
+                                <div key={i} className="h-96 bg-[#364153] rounded-2xl animate-pulse border border-gray-800" />
                             ))}
                         </div>
                     ) : filteredSkins.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                             {filteredSkins.map(skin => (
                                 <SkinCard key={skin.assetId} skin={skin} />
                             ))}

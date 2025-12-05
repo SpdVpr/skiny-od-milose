@@ -20,12 +20,17 @@ export default function SkinCard({ skin }: SkinProps) {
     return (
         <div
             onClick={handleCardClick}
-            className="group bg-gray-900 rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-800 hover:border-gray-700 flex flex-col cursor-pointer"
+            className="group bg-[#364153] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-800 hover:border-gray-700 flex flex-col cursor-pointer relative overflow-hidden"
             style={{
                 borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : undefined,
-                borderTopWidth: skin.rarityColor ? '3px' : undefined
+                borderTopWidth: skin.rarityColor ? '3px' : undefined,
+                padding: 'calc(var(--spacing) * 2)'
             }}
         >
+            {/* Shine Effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500 z-0">
+                <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
+            </div>
             {/* Image with Stickers - Square 1:1 with crop */}
             <div
                 className="relative aspect-square mb-4 overflow-hidden rounded-xl flex items-center justify-center"
@@ -37,22 +42,9 @@ export default function SkinCard({ skin }: SkinProps) {
                     cropTop={180}
                 />
 
-                {/* Wear Badge */}
-                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-medium text-slate-600 shadow-sm">
-                    {SkinUtils.translateWear(skin.wear)}
-                </div>
 
-                {/* Rarity Badge */}
-                <div
-                    className="absolute top-2 left-2 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1"
-                    style={{
-                        backgroundColor: `${skin.rarityColor || SkinUtils.getRarityColor(skin.rarity)}20`,
-                        color: skin.rarityColor || SkinUtils.getRarityColor(skin.rarity)
-                    }}
-                >
-                    <Award size={12} />
-                    {skin.rarity || SkinUtils.getDefaultRarity()}
-                </div>
+
+
 
                 {/* Name Tag Badge */}
                 {skin.nameTag && (
@@ -71,43 +63,29 @@ export default function SkinCard({ skin }: SkinProps) {
             </div>
 
             {/* Title */}
-            <div className="flex-1">
-                <h3
-                    className="font-bold line-clamp-1 mb-1"
-                    title={skin.name}
-                    style={{ color: skin.nameColor ? `#${skin.nameColor}` : '#ffffff' }}
-                >
-                    {skin.name}
-                </h3>
+            <div className="flex-1 relative z-10">
+                <div className="mb-2">
+                    {(() => {
+                        // Odstraní závorky s opotřebením z konce názvu, např. " (Zbrusu nový)"
+                        const cleanName = skin.name.replace(/\s*\([^)]*\)\s*$/, '');
 
-                {/* Stats Row with Price */}
-                <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
-                    {skin.floatValue !== undefined && (
-                        <div className="flex items-center gap-1">
-                            <span className="font-medium">Float:</span>
-                            <span
-                                className={`font-bold ${SkinUtils.isGoodFloat(skin.floatValue, skin.exterior)
-                                        ? 'text-green-400'
-                                        : 'text-gray-300'
-                                    }`}
-                            >
-                                {SkinUtils.formatFloat(skin.floatValue)}
-                            </span>
-                        </div>
-                    )}
-                    {skin.paintSeed !== undefined && (
-                        <div className="flex items-center gap-1">
-                            <Hash size={12} />
-                            <span className="font-bold text-gray-300">{skin.paintSeed}</span>
-                        </div>
-                    )}
-                    {/* Price */}
-                    <div className="flex items-center gap-1 ml-auto">
-                        <span className="text-base font-bold text-blue-400">
-                            {skin.price ? `${skin.price} Kč` : 'na dotaz'}
-                        </span>
-                    </div>
+                        return cleanName.includes('|') ? (
+                            <>
+                                <h3 className="font-bold text-white text-sm opacity-90 leading-tight">
+                                    {cleanName.split('|')[0].trim()}
+                                </h3>
+                                <h4 className="font-bold text-white text-lg leading-tight">
+                                    {cleanName.split('|')[1].trim()}
+                                </h4>
+                            </>
+                        ) : (
+                            <h3 className="font-bold text-white text-lg leading-tight">
+                                {cleanName}
+                            </h3>
+                        );
+                    })()}
                 </div>
+
             </div>
         </div>
     );
