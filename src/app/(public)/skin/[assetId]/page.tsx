@@ -85,8 +85,35 @@ export default function SkinDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black">
-            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden" style={{ maxWidth: '1500px', maxHeight: '950px' }}>
+        <div className="min-h-screen bg-black relative">
+            {/* Background Image - Left */}
+            <div
+                className="fixed inset-0 z-0"
+                style={{
+                    backgroundImage: 'url("/bg-front-left2.png")',
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'left center',
+                    backgroundRepeat: 'no-repeat',
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                }}
+            />
+            {/* Background Image - Right (Mirrored) */}
+            <div
+                className="fixed inset-0 z-0"
+                style={{
+                    backgroundImage: 'url("/bg-front-left2.png")',
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'left center',
+                    backgroundRepeat: 'no-repeat',
+                    transform: 'scaleX(-1)',
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                }}
+            />
+            <div className="fixed inset-0 z-0 bg-black/91" />
+
+            <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden" style={{ maxWidth: '1500px', maxHeight: '950px' }}>
                 {/* Back Button */}
                 <button
                     onClick={() => router.back()}

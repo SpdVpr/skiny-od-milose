@@ -209,7 +209,7 @@ export default function HomePage() {
                     maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
                 }}
             />
-            <div className="fixed inset-0 z-0 bg-black/96" />
+            <div className="fixed inset-0 z-0 bg-black/91" />
 
             {/* Content Wrapper */}
             <div className="relative z-10">
@@ -226,15 +226,22 @@ export default function HomePage() {
                 <section className="py-6 px-4 sm:px-6 lg:px-8">
                     <div className="max-w-7xl mx-auto">
                         <div className="bg-[#161616]/20 rounded-3xl p-6 lg:p-8 border border-[#161616]/20 shadow-2xl backdrop-blur-sm">
-                            <div className="text-center max-w-3xl mx-auto">
+                            <div className="text-center max-w-5xl mx-auto">
                                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
                                     Výkup, prodej i skiny na objednávku – vše na jednom místě.
                                 </h2>
-                                <p className="text-base text-gray-300 mb-6 whitespace-pre-line">
-                                    Bezpečnost, rychlost a spolehlivost.
-                                    Tisíce uzavřených obchodů a stovky spokojených zákazníků.
-                                    S Vámi už od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.
-                                </p>
+                                <div className="space-y-2 mb-6">
+                                    <p className="text-base text-gray-300">
+                                        Bezpečnost, rychlost a spolehlivost.
+                                    </p>
+                                    <p className="text-base text-gray-300">
+                                        Tisíce uzavřených obchodů a stovky spokojených zákazníků.
+                                    </p>
+                                    <p className="text-base text-gray-300">
+                                        S Vámi už od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry<br />
+                                        <span className="block mt-1">Counter Strike 2.</span>
+                                    </p>
+                                </div>
                                 <div className="flex flex-col items-center gap-4 mt-6">
                                     <h3 className="text-lg font-bold text-white">Kontaktuj mě:</h3>
                                     <div className="flex justify-center gap-4">
