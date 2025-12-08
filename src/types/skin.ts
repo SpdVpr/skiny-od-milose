@@ -52,6 +52,7 @@ export interface Skin {
   wear: string; // "Factory New", "Minimal Wear", atd. (lokalizovaný)
   exterior?: string; // "WearCategory0", "WearCategory1", atd. (internal name)
   dopplerPhase?: string; // "Phase 1", "Phase 2", "Ruby", "Sapphire", atd. (pro Doppler skiny)
+  phase?: string; // Manuálně zadaná fáze (např. pro Fade, Case Hardened atd.)
   minFloat?: number; // Minimální možný float pro tento skin
   maxFloat?: number; // Maximální možný float pro tento skin
 

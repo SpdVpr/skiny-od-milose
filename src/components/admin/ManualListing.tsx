@@ -55,6 +55,7 @@ export default function ManualListing() {
   const [weaponName, setWeaponName] = useState('');
   const [wear, setWear] = useState('Field-Tested');
   const [patternSeed, setPatternSeed] = useState('');
+  const [phase, setPhase] = useState('');
   const [floatValue, setFloatValue] = useState('');
   const [price, setPrice] = useState('');
   const [isStatTrak, setIsStatTrak] = useState(false);
@@ -338,6 +339,7 @@ export default function ManualListing() {
         paintSeed: parseInt(patternSeed),
         wear: wear,
         exterior: WEAR_OPTIONS.find(w => w.value === wear)?.internal,
+        phase: phase.trim() || undefined,
 
         // Kategorizace
         weaponType: weaponName,
@@ -377,6 +379,7 @@ export default function ManualListing() {
       setWeaponName('');
       setWear('Field-Tested');
       setPatternSeed('');
+      setPhase('');
       setFloatValue('');
       setPrice('');
       setIsStatTrak(false);
@@ -510,6 +513,24 @@ export default function ManualListing() {
                     required
                   />
                 </div>
+
+                {/* Phase */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Phase (Fáze)
+                  </label>
+                  <input
+                    type="text"
+                    value={phase}
+                    onChange={(e) => setPhase(e.target.value)}
+                    placeholder="např. Phase 4, 95% Fade"
+                    className="w-full px-4 py-2 bg-[#0f1117] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Volitelné - pro Doppler, Fade, Case Hardened apod.
+                  </p>
+                </div>
+
 
                 {/* Float Value */}
                 <div>

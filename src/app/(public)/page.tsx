@@ -18,18 +18,19 @@ interface Review {
 }
 
 // Kategorie zbraní
-// Kategorie zbraní
 const CATEGORIES = [
     { id: 'all', name: 'Vše' },
-    { id: 'rifle', name: 'Pušky' },
-    { id: 'pistol', name: 'Pistole' },
-    { id: 'sniper', name: 'Odstřelovací pušky' },
-    { id: 'smg', name: 'Samopaly' },
     { id: 'knife', name: 'Nože' },
     { id: 'gloves', name: 'Rukavice' },
+    { id: 'sniper', name: 'Odstřelovací pušky' },
+    { id: 'rifle', name: 'Pušky' },
+    { id: 'pistol', name: 'Pistole' },
+    { id: 'smg', name: 'Samopaly' },
     { id: 'agent', name: 'Agenti' },
     { id: 'other', name: 'Ostatní' },
 ];
+
+type SortOption = 'newest' | 'tradable' | 'alphabetical';
 
 export default function HomePage() {
     const [skins, setSkins] = useState<Skin[]>([]);
@@ -37,6 +38,7 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [sortBy, setSortBy] = useState<SortOption>('newest');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -75,7 +77,6 @@ export default function HomePage() {
         fetchData();
     }, []);
 
-    // Mapování Steam kategorií na naše kategorie
     // Mapování Steam kategorií na naše kategorie
     const mapSteamCategory = (steamCategory: string): string => {
         const lower = steamCategory.toLowerCase();
@@ -135,7 +136,7 @@ export default function HomePage() {
         return 'other';
     };
 
-    // Filtrování skinů
+    // Filtrování a řazení skinů
     const filteredSkins = skins.filter(skin => {
         const matchesSearch = skin.name.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -164,141 +165,205 @@ export default function HomePage() {
         const matchesCategory = selectedCategory === 'all' || skinCategory === selectedCategory;
 
         return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+        if (sortBy === 'newest') {
+            return (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0);
+        }
+        if (sortBy === 'tradable') {
+            // Tradable first
+            if (a.tradable === b.tradable) {
+                return (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0); // Then by date
+            }
+            return (a.tradable ? -1 : 1);
+        }
+        if (sortBy === 'alphabetical') {
+            return a.name.localeCompare(b.name);
+        }
+        return 0;
     });
 
     return (
-        <div className="min-h-screen bg-black">
-            {/* Header / Logo */}
-            <header className="py-6 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto text-center">
-                    <h1 className="text-5xl lg:text-6xl text-white tracking-wide" style={{ fontFamily: "'SF Orson Casual', sans-serif", fontWeight: 300 }}>
-                        skiny od miloše
-                    </h1>
-                </div>
-            </header>
+        <div className="min-h-screen bg-black relative">
+            {/* Background Image - Left */}
+            <div
+                className="fixed inset-0 z-0"
+                style={{
+                    backgroundImage: 'url("/bg-front-left2.png")',
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'left center',
+                    backgroundRepeat: 'no-repeat',
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                }}
+            />
+            {/* Background Image - Right (Mirrored) */}
+            <div
+                className="fixed inset-0 z-0"
+                style={{
+                    backgroundImage: 'url("/bg-front-left2.png")',
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'left center',
+                    backgroundRepeat: 'no-repeat',
+                    transform: 'scaleX(-1)',
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                }}
+            />
+            <div className="fixed inset-0 z-0 bg-black/96" />
 
-            {/* Hero Section - Představení + Kontakt */}
-            <section className="py-6 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="bg-[#161616] rounded-3xl p-6 lg:p-8 border border-[#161616] shadow-2xl">
-                        <div className="text-center max-w-3xl mx-auto">
-                            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
-                                Vítejte v obchodě s CS:GO skiny
-                            </h2>
-                            <p className="text-base text-gray-300 mb-6">
-                                Nabízím kvalitní CS:GO skiny za férové ceny. Rychlé jednání, ověřené float hodnoty a stovky spokojených zákazníků.
-                            </p>
-                            <div className="flex flex-wrap justify-center gap-3">
-                                <a
-                                    href="https://www.facebook.com/skinyodmilose"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
-                                >
-                                    <Facebook size={18} />
-                                    Facebook
-                                </a>
-                                <a
-                                    href="https://steamcommunity.com/id/skinyodmilose"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
-                                >
-                                    <Image
-                                        src="/steam_black_logo_icon_147078.png"
-                                        alt="Steam"
-                                        width={24}
-                                        height={24}
-                                        className="invert select-none pointer-events-none"
-                                    />
-                                    Steam
-                                </a>
+            {/* Content Wrapper */}
+            <div className="relative z-10">
+                {/* Header / Logo */}
+                <header className="py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto text-center">
+                        <h1 className="text-3xl lg:text-5xl text-white tracking-wide" style={{ fontFamily: "'SF Orson Casual', sans-serif", fontWeight: 300 }}>
+                            skiny od miloše
+                        </h1>
+                    </div>
+                </header>
+
+                {/* Hero Section - Představení + Kontakt */}
+                <section className="py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="bg-[#161616]/20 rounded-3xl p-6 lg:p-8 border border-[#161616]/20 shadow-2xl backdrop-blur-sm">
+                            <div className="text-center max-w-3xl mx-auto">
+                                <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
+                                    Výkup, prodej i skiny na objednávku – vše na jednom místě.
+                                </h2>
+                                <p className="text-base text-gray-300 mb-6 whitespace-pre-line">
+                                    Bezpečnost, rychlost a spolehlivost.
+                                    Tisíce uzavřených obchodů a stovky spokojených zákazníků.
+                                    S Vámi už od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.
+                                </p>
+                                <div className="flex flex-col items-center gap-4 mt-6">
+                                    <h3 className="text-lg font-bold text-white">Kontaktuj mě:</h3>
+                                    <div className="flex justify-center gap-4">
+                                        <a
+                                            href="https://www.facebook.com/skinyodmilose"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="bg-black hover:bg-gray-900 text-white p-4 rounded-2xl transition-all shadow-lg"
+                                            aria-label="Facebook"
+                                        >
+                                            <Facebook size={24} />
+                                        </a>
+                                        <a
+                                            href="https://steamcommunity.com/id/skinyodmilose"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="bg-black hover:bg-gray-900 text-white p-4 rounded-2xl transition-all shadow-lg flex items-center justify-center"
+                                            aria-label="Steam"
+                                        >
+                                            <Image
+                                                src="/steam_black_logo_icon_147078.png"
+                                                alt="Steam"
+                                                width={24}
+                                                height={24}
+                                                className="invert select-none pointer-events-none"
+                                            />
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Reviews Section */}
-            <section className="py-6 px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto" style={{ maxWidth: '1500px' }}>
-                    <ReviewsCarousel reviews={reviews} />
-                </div>
-            </section>
-
-            {/* Filter Section */}
-            <section className="py-4 px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto flex flex-col md:flex-row gap-4 items-center justify-between" style={{ maxWidth: '1500px' }}>
-                    {/* Search */}
-                    <div className="relative w-full max-w-xs md:max-w-sm shrink-0">
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Hledej..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-2.5 bg-[#161616] border border-[#161616] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-all"
-                        />
+                {/* Reviews Section */}
+                <section className="py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto" style={{ maxWidth: '1500px' }}>
+                        <ReviewsCarousel reviews={reviews} />
                     </div>
+                </section>
 
-                    {/* Categories */}
-                    <div className="flex flex-wrap justify-center md:justify-end gap-2 flex-grow">
-                        {CATEGORIES.map(category => (
-                            <button
-                                key={category.id}
-                                onClick={() => setSelectedCategory(category.id)}
-                                className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
-                                    ? 'bg-gray-200 text-gray-900 shadow-lg shadow-white/10'
-                                    : 'bg-[#161616] text-gray-300 border border-[#161616] hover:border-[#161616] hover:bg-gray-800'
-                                    }`}
+                {/* Filter Section */}
+                <section className="py-4 px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto flex flex-col md:flex-row gap-4 items-center justify-between" style={{ maxWidth: '1500px' }}>
+                        {/* Search and Sort */}
+                        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                            {/* Search */}
+                            <div className="relative w-full sm:w-64 shrink-0">
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder="Hledej..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-2.5 bg-[#161616] border border-[#161616] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-all"
+                                />
+                            </div>
+
+                            {/* Sort Dropdown */}
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                                className="px-4 py-2.5 bg-[#161616] border border-[#161616] text-white rounded-xl focus:outline-none focus:border-gray-500 transition-all cursor-pointer"
                             >
-                                <span>{category.name}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                                <option value="newest">Nejnovější</option>
+                                <option value="tradable">Tradable</option>
+                                <option value="alphabetical">Abecedně</option>
+                            </select>
+                        </div>
 
-            {/* Products Grid - 7 columns */}
-            <section className="py-6 px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto" style={{ maxWidth: '1500px' }}>
-                    {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                            {[...Array(12)].map((_, i) => (
-                                <div key={i} className="h-96 bg-[#161616] rounded-2xl animate-pulse border border-[#161616]" />
+                        {/* Categories */}
+                        <div className="flex flex-wrap justify-center md:justify-end gap-2 flex-grow">
+                            {CATEGORIES.map(category => (
+                                <button
+                                    key={category.id}
+                                    onClick={() => setSelectedCategory(category.id)}
+                                    className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
+                                        ? 'bg-gray-200 text-gray-900 shadow-lg shadow-white/10'
+                                        : 'bg-[#161616] text-gray-300 border border-[#161616] hover:border-[#161616] hover:bg-gray-800'
+                                        }`}
+                                >
+                                    <span>{category.name}</span>
+                                </button>
                             ))}
                         </div>
-                    ) : filteredSkins.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                            {filteredSkins.map(skin => (
-                                <SkinCard key={skin.assetId} skin={skin} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-20">
-                            <p className="text-gray-500 text-lg">
-                                {searchQuery || selectedCategory !== 'all'
-                                    ? 'Žádné skiny nenalezeny. Zkuste jiné hledání nebo kategorii.'
-                                    : 'Momentálně nejsou k dispozici žádné skiny.'}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* Footer */}
-            <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-[#161616]">
-                <div className="max-w-7xl mx-auto text-center">
-                    <p className="text-gray-500 text-sm">
-                        © 2024 Skiny od Miloše. Všechna práva vyhrazena.
-                    </p>
-                    <div className="flex justify-center gap-6 mt-4">
-                        <a href="https://www.facebook.com/skinyodmilose" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors">
-                            <Facebook size={20} />
-                        </a>
                     </div>
-                </div>
-            </footer>
+                </section>
+
+                {/* Products Grid - 7 columns */}
+                <section className="py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto" style={{ maxWidth: '1500px' }}>
+                        {loading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                                {[...Array(12)].map((_, i) => (
+                                    <div key={i} className="h-96 bg-[#161616] rounded-2xl animate-pulse border border-[#161616]" />
+                                ))}
+                            </div>
+                        ) : filteredSkins.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                                {filteredSkins.map(skin => (
+                                    <SkinCard key={skin.assetId} skin={skin} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-20">
+                                <p className="text-gray-500 text-lg">
+                                    {searchQuery || selectedCategory !== 'all'
+                                        ? 'Žádné skiny nenalezeny. Zkuste jiné hledání nebo kategorii.'
+                                        : 'Momentálně nejsou k dispozici žádné skiny.'}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* Footer */}
+                <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-[#161616]">
+                    <div className="max-w-7xl mx-auto text-center">
+                        <p className="text-gray-500 text-sm">
+                            © 2024 Skiny od Miloše. Všechna práva vyhrazena.
+                        </p>
+                        <div className="flex justify-center gap-6 mt-4">
+                            <a href="https://www.facebook.com/skinyodmilose" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors">
+                                <Facebook size={20} />
+                            </a>
+                        </div>
+                    </div>
+                </footer>
+            </div>
         </div>
     );
 }

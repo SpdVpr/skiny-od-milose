@@ -4,6 +4,7 @@ import SyncButtonDirect from '@/components/admin/SyncButtonDirect';
 import ManualImport from '@/components/admin/ManualImport';
 import DeleteAllButton from '@/components/admin/DeleteAllButton';
 import CSFloatRefreshButton from '@/components/admin/CSFloatRefreshButton';
+import CurrencySettings from '@/components/admin/CurrencySettings';
 
 export default function AdminDashboard() {
     return (
@@ -19,7 +20,8 @@ export default function AdminDashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <CurrencySettings />
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">

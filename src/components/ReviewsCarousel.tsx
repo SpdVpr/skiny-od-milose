@@ -126,18 +126,18 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                             <Star
                                                 key={i}
                                                 size={16}
-                                                className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}
+                                                className={i < review.rating ? 'fill-[#fbbc04] text-[#fbbc04]' : 'fill-gray-600 text-gray-600'}
                                             />
                                         ))}
                                     </div>
 
                                     {/* Review Text */}
-                                    <p className="text-gray-300 text-sm mb-6 flex-1 line-clamp-2">
+                                    <p className="text-gray-300 text-sm mb-3 flex-1 line-clamp-2">
                                         "{review.text}"
                                     </p>
 
                                     {/* Author & Date */}
-                                    <div className="text-xs text-gray-500 border-t border-[#161616] pt-3">
+                                    <div className="text-xs text-gray-500 border-t border-[#161616] pt-2">
                                         <div className="font-semibold text-gray-400">{review.author}</div>
                                         <div>{new Date(review.date).toLocaleDateString('cs-CZ')}</div>
                                     </div>

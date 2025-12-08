@@ -47,6 +47,20 @@ export default function SkinStats({ skin }: SkinStatsProps) {
         </div>
       )}
 
+
+      {/* Phase - Manual */}
+      {skin.phase && (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-[#161616]">
+            <Hash className="text-gray-400" size={20} />
+          </div>
+          <div className="flex-1">
+            <div className="text-xs text-gray-400 font-medium">Phase</div>
+            <div className="text-lg font-bold text-white">{skin.phase}</div>
+          </div>
+        </div>
+      )}
+
       {/* Rarity - Always show */}
       <div className="flex items-center gap-3">
         <div
@@ -103,26 +117,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
         </div>
       )}
 
-      {/* Collection */}
-      {skin.collection && (
-        <div className="pt-2 border-t border-[#161616]">
-          <div className="text-xs text-gray-400 font-medium">Kolekce</div>
-          <div className="text-sm font-medium text-gray-300 mt-1">{skin.collection}</div>
-        </div>
-      )}
 
-      {/* Tournament */}
-      {(skin.tournament || skin.tournamentTeam) && (
-        <div className="pt-2 border-t border-[#161616]">
-          <div className="text-xs text-gray-400 font-medium mb-1">Tournament</div>
-          {skin.tournament && (
-            <div className="text-sm font-medium text-gray-300">{skin.tournament}</div>
-          )}
-          {skin.tournamentTeam && (
-            <div className="text-sm text-gray-400">{skin.tournamentTeam}</div>
-          )}
-        </div>
-      )}
 
 
     </div>

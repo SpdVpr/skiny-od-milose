@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { Skin, SkinUtils } from '@/types/skin';
-import { ArrowLeft, ExternalLink, Award, Hash, Tag, TrendingUp, Shield, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Award, Hash, Tag, TrendingUp, Shield, Calendar, ArrowLeftRight } from 'lucide-react';
 import SkinStats from '@/components/SkinStats';
 import SkinImageWithStickers from '@/components/SkinImageWithStickers';
 
@@ -17,12 +17,20 @@ export default function SkinDetailPage() {
     const [skin, setSkin] = useState<Skin | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currency, setCurrency] = useState<'CZK' | 'EUR'>('CZK');
+    const [exchangeRate, setExchangeRate] = useState<number>(25);
 
     useEffect(() => {
         const fetchSkin = async () => {
             try {
                 console.log('🔍 [DETAIL] Načítám skin:', assetId);
                 const skinDoc = await getDoc(doc(db, 'skins', assetId));
+
+                // Fetch exchange rate
+                const settingsDoc = await getDoc(doc(db, 'settings', 'currency'));
+                if (settingsDoc.exists()) {
+                    setExchangeRate(settingsDoc.data().exchangeRate);
+                }
 
                 if (!skinDoc.exists()) {
                     setError('Skin nebyl nalezen');
@@ -142,22 +150,48 @@ export default function SkinDetailPage() {
                     <div className="space-y-4">
                         {/* Title */}
                         <div>
-                            <h1 className="text-2xl font-bold mb-1 text-white">
+                            <h1 className="text-xl font-medium text-gray-300 mb-1">
                                 {skin.name}
                             </h1>
-                            {skin.marketHashName && skin.marketHashName !== skin.name && (
-                                <p className="text-gray-400">{skin.marketHashName}</p>
-                            )}
                         </div>
 
                         {/* Price - Always First */}
-                        <div className="bg-[#0d0d0e] text-white rounded-xl p-3 shadow-lg border border-[#0d0d0e]">
+                        <div className="bg-[#161616] text-white rounded-xl p-3 shadow-lg border border-[#161616]">
                             <div className="flex items-center justify-center gap-3 mb-2">
-                                <DollarSign size={24} className="text-gray-400" />
                                 <span className="text-lg font-medium text-gray-400">Cena</span>
                             </div>
-                            <div className="text-2xl font-bold mb-2 text-center">
-                                {skin.price ? `${skin.price} Kč` : 'na dotaz'}
+                            <div className="flex items-center justify-center gap-4 mb-2">
+                                <div className="text-2xl font-bold text-center">
+                                    {skin.price ? (
+                                        (() => {
+                                            if (currency === 'CZK') {
+                                                return new Intl.NumberFormat('cs-CZ', {
+                                                    style: 'currency',
+                                                    currency: 'CZK',
+                                                    maximumFractionDigits: 0
+                                                }).format(skin.price);
+                                            } else {
+                                                const priceEur = skin.price / exchangeRate;
+                                                return new Intl.NumberFormat('de-DE', {
+                                                    style: 'currency',
+                                                    currency: 'EUR',
+                                                    maximumFractionDigits: 2
+                                                }).format(priceEur);
+                                            }
+                                        })()
+                                    ) : 'na dotaz'}
+                                </div>
+
+                                {skin.price && (
+                                    <button
+                                        onClick={() => setCurrency(prev => prev === 'CZK' ? 'EUR' : 'CZK')}
+                                        className="bg-[#161616] hover:bg-gray-800 text-gray-400 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border border-gray-800 flex items-center gap-2"
+                                        title="Přepnout měnu"
+                                    >
+                                        <ArrowLeftRight size={14} />
+                                        {currency === 'CZK' ? 'EUR' : 'CZK'}
+                                    </button>
+                                )}
                             </div>
 
                             {/* Tradable/Marketable Status */}
@@ -167,7 +201,7 @@ export default function SkinDetailPage() {
                                     new Date(skin.tradeRestrictionDate) > new Date();
 
                                 return (
-                                    <div className="pt-4 border-t border-[#0d0d0e]">
+                                    <div className="pt-4 border-t border-[#161616]">
                                         <div className="flex flex-wrap gap-2 justify-center">
                                             {/* Show trade lock if restriction date is in the future */}
                                             {isTradeRestricted ? (
@@ -198,6 +232,15 @@ export default function SkinDetailPage() {
                                     </div>
                                 );
                             })()}
+
+                            {/* Price Disclaimer */}
+                            <div className="mt-3 pt-3 border-t border-[#161616] text-center">
+                                <p className="text-xs text-gray-500 italic">
+                                    Tato cena je pouze orientační a je nutné jí ověřit.
+                                    <br />
+                                    Nacenění skinů vychází z prodejních dat nejověřenějších obchodních stránek.
+                                </p>
+                            </div>
                         </div>
 
 

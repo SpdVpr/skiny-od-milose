@@ -1,13 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, updateDoc, setDoc, query, orderBy, writeBatch, deleteDoc, Timestamp } from 'firebase/firestore';
-import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2, Copy } from 'lucide-react';
+import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2, Copy, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { Skin, SkinUtils } from '@/types/skin';
+import { Skin, SkinUtils, SkinSticker } from '@/types/skin';
 import SkinStats from '@/components/SkinStats';
 import ScreenshotUpload from '@/components/admin/ScreenshotUpload';
+import { POPULAR_STICKERS, searchStickers, StickerData } from '@/data/stickers';
+
+// Mapování opotřebení
+const WEAR_OPTIONS = [
+    { value: 'Factory New', internal: 'WearCategory0', label: 'Factory New (Zbrusu nový)' },
+    { value: 'Minimal Wear', internal: 'WearCategory1', label: 'Minimal Wear (Téměř bez známek)' },
+    { value: 'Field-Tested', internal: 'WearCategory2', label: 'Field-Tested (Opotřebený)' },
+    { value: 'Well-Worn', internal: 'WearCategory3', label: 'Well-Worn (Hodně opotřebený)' },
+    { value: 'Battle-Scarred', internal: 'WearCategory4', label: 'Battle-Scarred (Poničený bojem)' },
+];
 
 // Kategorie zbraní
 const CATEGORIES = [
@@ -33,9 +43,22 @@ export default function InventoryTable() {
     const [editingSkin, setEditingSkin] = useState<Skin | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
 
+    // Sticker management state
+    const [stickerSearchQuery, setStickerSearchQuery] = useState<string[]>([]);
+    const [showStickerDropdown, setShowStickerDropdown] = useState<number | null>(null);
+
     useEffect(() => {
         fetchSkins();
     }, []);
+
+    // Initialize sticker search queries when opening edit modal
+    useEffect(() => {
+        if (editingSkin && editingSkin.stickers) {
+            setStickerSearchQuery(editingSkin.stickers.map(s => s.name || ''));
+        } else {
+            setStickerSearchQuery([]);
+        }
+    }, [editingSkin]);
 
     const fetchSkins = async () => {
         try {
@@ -177,6 +200,67 @@ export default function InventoryTable() {
         setShowEditModal(true);
     };
 
+    // Sticker handlers
+    const handleAddSticker = () => {
+        if (!editingSkin) return;
+        const currentStickers = editingSkin.stickers || [];
+        if (currentStickers.length >= 5) return;
+
+        const newSticker: SkinSticker = {
+            position: currentStickers.length,
+            classId: '',
+            name: '',
+        };
+
+        setEditingSkin({
+            ...editingSkin,
+            stickers: [...currentStickers, newSticker]
+        });
+        setStickerSearchQuery([...stickerSearchQuery, '']);
+    };
+
+    const handleRemoveSticker = (index: number) => {
+        if (!editingSkin || !editingSkin.stickers) return;
+
+        const newStickers = editingSkin.stickers.filter((_, i) => i !== index);
+        setEditingSkin({
+            ...editingSkin,
+            stickers: newStickers
+        });
+
+        const newQueries = stickerSearchQuery.filter((_, i) => i !== index);
+        setStickerSearchQuery(newQueries);
+    };
+
+    const handleSelectSticker = (index: number, sticker: StickerData) => {
+        if (!editingSkin || !editingSkin.stickers) return;
+
+        const newStickers = [...editingSkin.stickers];
+        newStickers[index] = {
+            ...newStickers[index],
+            classId: sticker.classId,
+            name: sticker.name,
+            imageUrl: `https://steamcommunity.com/economy/image/class/730/${sticker.classId}/96fx96f`
+        };
+
+        setEditingSkin({
+            ...editingSkin,
+            stickers: newStickers
+        });
+
+        const newQueries = [...stickerSearchQuery];
+        newQueries[index] = sticker.name;
+        setStickerSearchQuery(newQueries);
+        setShowStickerDropdown(null);
+    };
+
+    const handleStickerSearchChange = (index: number, value: string) => {
+        const newQueries = [...stickerSearchQuery];
+        newQueries[index] = value;
+        setStickerSearchQuery(newQueries);
+        setShowStickerDropdown(index);
+    };
+
     const saveEdit = async () => {
         if (!editingSkin) return;
 
@@ -184,40 +268,48 @@ export default function InventoryTable() {
             // Připravíme data bez undefined hodnot
             const updateData: any = {
                 name: editingSkin.name,
+                updatedAt: Timestamp.now(), // Aktualizujeme čas poslední úpravy
             };
 
-            // Přidáme pouze definované hodnoty
-            if (editingSkin.price !== undefined && editingSkin.price !== null) {
-                updateData.price = editingSkin.price;
+            // Přidáme základní hodnoty
+            if (editingSkin.price !== undefined && editingSkin.price !== null && !isNaN(Number(editingSkin.price))) {
+                updateData.price = Number(editingSkin.price);
             }
-            if (editingSkin.category) {
-                updateData.category = editingSkin.category;
+            if (editingSkin.category) updateData.category = editingSkin.category;
+            if (editingSkin.floatValue !== undefined && editingSkin.floatValue !== null) updateData.floatValue = editingSkin.floatValue;
+            if (editingSkin.paintSeed !== undefined && editingSkin.paintSeed !== null) updateData.paintSeed = editingSkin.paintSeed;
+            if (editingSkin.inspectLink) updateData.inspectLink = editingSkin.inspectLink;
+            if (editingSkin.phase) updateData.phase = editingSkin.phase;
+
+            // Wear
+            if (editingSkin.wear) {
+                updateData.wear = editingSkin.wear;
+                const exterior = WEAR_OPTIONS.find(w => w.value === editingSkin.wear)?.internal;
+                if (exterior) updateData.exterior = exterior;
             }
-            if (editingSkin.floatValue !== undefined && editingSkin.floatValue !== null) {
-                updateData.floatValue = editingSkin.floatValue;
-            }
-            if (editingSkin.paintSeed !== undefined && editingSkin.paintSeed !== null) {
-                updateData.paintSeed = editingSkin.paintSeed;
-            }
-            if (editingSkin.inspectLink) {
-                updateData.inspectLink = editingSkin.inspectLink;
+
+            // Stickers
+            if (editingSkin.stickers && editingSkin.stickers.length > 0) {
+                // Filter out empty stickers
+                const validStickers = editingSkin.stickers.filter(s => s.classId && s.name);
+                if (validStickers.length > 0) {
+                    updateData.stickers = validStickers;
+                } else {
+                    updateData.stickers = []; // Remove if all deleted/invalid
+                }
+            } else {
+                updateData.stickers = []; // Clear stickers if empty array
             }
 
             // Market info
-            if (editingSkin.tradable !== undefined) {
-                updateData.tradable = editingSkin.tradable;
-            }
-            if (editingSkin.marketable !== undefined) {
-                updateData.marketable = editingSkin.marketable;
-            }
-            if (editingSkin.tradeRestrictionDate) {
-                updateData.tradeRestrictionDate = editingSkin.tradeRestrictionDate;
-            }
+            if (editingSkin.tradable !== undefined) updateData.tradable = editingSkin.tradable;
+            if (editingSkin.marketable !== undefined) updateData.marketable = editingSkin.marketable;
+            if (editingSkin.tradeRestrictionDate) updateData.tradeRestrictionDate = editingSkin.tradeRestrictionDate;
 
             await updateDoc(doc(db, 'skins', editingSkin.assetId), updateData);
 
             setSkins(prev => prev.map(s =>
-                s.assetId === editingSkin.assetId ? editingSkin : s
+                s.assetId === editingSkin.assetId ? { ...s, ...updateData } : s
             ));
 
             toast.success('Produkt úspěšně upraven!');
@@ -863,6 +955,38 @@ export default function InventoryTable() {
                                 </select>
                             </div>
 
+                            {/* Opotřebení (Wear) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Opotřebení (Wear)
+                                </label>
+                                <select
+                                    value={editingSkin.wear || 'Field-Tested'}
+                                    onChange={(e) => setEditingSkin({ ...editingSkin, wear: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                                >
+                                    {WEAR_OPTIONS.map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Phase */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Phase (Fáze)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingSkin.phase || ''}
+                                    onChange={(e) => setEditingSkin({ ...editingSkin, phase: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                                    placeholder="např. Phase 4, 95% Fade"
+                                />
+                            </div>
+
                             {/* Float Value */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -903,6 +1027,99 @@ export default function InventoryTable() {
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
                                     placeholder="steam://rungame/730/..."
                                 />
+                            </div>
+
+                            {/* Stickers Section */}
+                            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                    Stickery (Samolepky)
+                                </label>
+                                <div className="space-y-3">
+                                    {(editingSkin.stickers || []).map((sticker, index) => (
+                                        <div key={index} className="flex gap-2 items-start">
+                                            <div className="flex-1 relative">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Search className="w-4 h-4 text-gray-500" />
+                                                    <input
+                                                        type="text"
+                                                        value={stickerSearchQuery[index] || sticker.name}
+                                                        onChange={(e) => handleStickerSearchChange(index, e.target.value)}
+                                                        onFocus={() => setShowStickerDropdown(index)}
+                                                        placeholder={`Vyhledat sticker (pozice ${index + 1})`}
+                                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:border-blue-500"
+                                                    />
+                                                </div>
+
+                                                {/* Dropdown with results */}
+                                                {showStickerDropdown === index && (
+                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                        {searchStickers(stickerSearchQuery[index] || '').map((stickerData) => (
+                                                            <button
+                                                                key={stickerData.classId}
+                                                                type="button"
+                                                                onClick={() => handleSelectSticker(index, stickerData)}
+                                                                className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm border-b border-gray-100 last:border-0"
+                                                            >
+                                                                <div className="text-gray-900 font-medium">{stickerData.name}</div>
+                                                                {stickerData.tournament && (
+                                                                    <div className="text-xs text-gray-500">
+                                                                        {stickerData.tournament}
+                                                                        {stickerData.team && ` • ${stickerData.team}`}
+                                                                        {stickerData.player && ` • ${stickerData.player}`}
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                        ))}
+                                                        {searchStickers(stickerSearchQuery[index] || '').length === 0 && (
+                                                            <div className="px-4 py-2 text-sm text-gray-500 italic">
+                                                                Žádné stickery nenalezeny
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Selected sticker preview */}
+                                                {sticker.classId && (
+                                                    <div className="mt-2 p-2 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                                        <div className="flex items-center gap-2">
+                                                            <img
+                                                                src={`https://steamcommunity.com/economy/image/class/730/${sticker.classId}/96fx96f`}
+                                                                alt={sticker.name}
+                                                                className="w-12 h-12 object-contain"
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = 'none';
+                                                                }}
+                                                            />
+                                                            <div className="flex-1 text-xs">
+                                                                <div className="text-gray-900 font-medium">{sticker.name}</div>
+                                                                <div className="text-gray-500">Class ID: {sticker.classId}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveSticker(index)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Odstranit sticker"
+                                            >
+                                                <X className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {(editingSkin.stickers || []).length < 5 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleAddSticker}
+                                            className="w-full px-4 py-2 bg-white border border-gray-300 border-dashed rounded-lg text-gray-500 hover:text-blue-600 hover:border-blue-500 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            Přidat sticker
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Market Info - Tradable & Marketable */}

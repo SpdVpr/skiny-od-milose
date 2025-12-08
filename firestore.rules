@@ -17,21 +17,19 @@ service cloud.firestore {
     
     // Kolekce skins
     match /skins/{skinId} {
-      // Čtení: Všichni mohou číst pouze viditelné skiny
-      allow read: if resource.data.isVisible == true;
+      // Čtení: Povolit všem pro vývoj (v produkci zvážit omezení na isVisible)
+      allow read: if true;
       
-      // Admin čtení: Pokud implementujete autentizaci, můžete přidat:
-      // allow read: if request.auth != null && request.auth.token.admin == true;
-      
-      // Zápis: Pouze z backendu (server-side)
-      // Pro development můžete povolit zápis všem, ale v produkci to ZAKAŽTE
-      allow write: if false;
-      
-      // Pokud chcete povolit zápis pouze autentizovaným adminům:
-      // allow write: if request.auth != null && request.auth.token.admin == true && isValidSkin(request.resource.data);
+      // Zápis: Povolit pro admin panel (v produkci zabezpečit!)
+      allow write: if true;
     }
 
-    // Kolekce reviews
+    // Kolekce settings (pro měnové kurzy)
+    match /settings/{document=**} {
+      allow read: if true;
+      allow write: if false; // Zápis pouze admin přes konzoli nebo pokud přidáš auth pravidla
+    }
+
     // Kolekce reviews
     match /reviews/{reviewId} {
       allow read: if true;
