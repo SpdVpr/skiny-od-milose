@@ -188,25 +188,25 @@ export default function HomePage() {
             <div
                 className="fixed inset-0 z-0"
                 style={{
-                    backgroundImage: 'url("/bg-front-left2.png")',
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'left center',
+                    backgroundImage: 'url("/bg-front-left3.png")',
+                    backgroundSize: '70% auto',
+                    backgroundPosition: 'left top',
                     backgroundRepeat: 'no-repeat',
-                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
-                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 60%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 60%)'
                 }}
             />
             {/* Background Image - Right (Mirrored) */}
             <div
                 className="fixed inset-0 z-0"
                 style={{
-                    backgroundImage: 'url("/bg-front-left2.png")',
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'left center',
+                    backgroundImage: 'url("/bg-front-left3.png")',
+                    backgroundSize: '70% auto',
+                    backgroundPosition: 'left top',
                     backgroundRepeat: 'no-repeat',
                     transform: 'scaleX(-1)',
-                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
-                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 60%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 60%)',
                 }}
             />
             <div className="fixed inset-0 z-0 bg-black/91" />
@@ -227,7 +227,7 @@ export default function HomePage() {
                     <div className="max-w-7xl mx-auto">
                         <div className="bg-[#161616]/20 rounded-3xl p-6 lg:p-8 border border-[#161616]/20 shadow-2xl backdrop-blur-sm">
                             <div className="text-center max-w-5xl mx-auto">
-                                <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
+                                <h2 className="text-xl lg:text-2xl font-bold text-white mb-3">
                                     Výkup, prodej i skiny na objednávku – vše na jednom místě.
                                 </h2>
                                 <div className="space-y-2 mb-6">
@@ -238,7 +238,7 @@ export default function HomePage() {
                                         Tisíce uzavřených obchodů a stovky spokojených zákazníků.
                                     </p>
                                     <p className="text-base text-gray-300">
-                                        S Vámi od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.<br />                                  
+                                        S Vámi od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.<br />
                                     </p>
                                 </div>
                                 <div className="flex flex-col items-center gap-4 mt-6">
@@ -248,7 +248,7 @@ export default function HomePage() {
                                             href="https://www.facebook.com/skinyodmilose"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="bg-black hover:bg-gray-900 text-white p-4 rounded-2xl transition-all shadow-lg"
+                                            className="bg-[#161616]/20 hover:bg-[#161616]/40 text-white p-4 rounded-2xl transition-all shadow-lg border border-[#161616] backdrop-blur-sm"
                                             aria-label="Facebook"
                                         >
                                             <Facebook size={24} />
@@ -257,7 +257,7 @@ export default function HomePage() {
                                             href="https://steamcommunity.com/id/skinyodmilose"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="bg-black hover:bg-gray-900 text-white p-4 rounded-2xl transition-all shadow-lg flex items-center justify-center"
+                                            className="bg-[#161616]/20 hover:bg-[#161616]/40 text-white p-4 rounded-2xl transition-all shadow-lg flex items-center justify-center border border-[#161616] backdrop-blur-sm"
                                             aria-label="Steam"
                                         >
                                             <Image

@@ -80,70 +80,70 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
 
     return (
         <div className="relative">
-            {/* Nadpis */}
-
-
             {/* Carousel Container */}
             <div className="relative">
-                {/* Navigation Buttons */}
-                {reviews.length > itemsPerView && (
-                    <>
-                        <button
-                            onClick={goToPrevious}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all"
-                            aria-label="Previous reviews"
-                        >
-                            <ChevronLeft size={24} />
-                        </button>
-                        <button
-                            onClick={goToNext}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all"
-                            aria-label="Next reviews"
-                        >
-                            <ChevronRight size={24} />
-                        </button>
-                    </>
-                )}
-
-                {/* Reviews Grid - Plynulá slideshow */}
-                <div className="overflow-hidden">
-                    <div
-                        className="flex transition-transform duration-700 ease-in-out"
-                        style={{
-                            transform: `translateX(-${(currentIndex / itemsPerView) * 100}%)`,
-                        }}
-                    >
-                        {reviews.map((review) => (
-                            <div
-                                key={review.id}
-                                className="flex-shrink-0 px-3"
-                                style={{ width: `${100 / itemsPerView}%` }}
+                {/* Inner Container for Grid + Buttons to center buttons relative to grid */}
+                <div className="relative">
+                    {/* Navigation Buttons */}
+                    {reviews.length > itemsPerView && (
+                        <>
+                            <button
+                                onClick={goToPrevious}
+                                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-[#161616]/20 hover:bg-white hover:text-black hover:scale-110 border border-[#161616] text-white p-3 rounded-full shadow-lg transition-all backdrop-blur-sm"
+                                aria-label="Previous reviews"
                             >
-                                <div className="bg-[#161616] rounded-2xl p-6 border border-[#161616] hover:border-[#161616] transition-all h-full flex flex-col">
-                                    {/* Rating Stars */}
-                                    <div className="flex items-center gap-1 mb-3">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star
-                                                key={i}
-                                                size={16}
-                                                className={i < review.rating ? 'fill-[#fbbc04] text-[#fbbc04]' : 'fill-gray-600 text-gray-600'}
-                                            />
-                                        ))}
-                                    </div>
+                                <ChevronLeft size={24} />
+                            </button>
+                            <button
+                                onClick={goToNext}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-[#161616]/20 hover:bg-white hover:text-black hover:scale-110 border border-[#161616] text-white p-3 rounded-full shadow-lg transition-all backdrop-blur-sm"
+                                aria-label="Next reviews"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
+                        </>
+                    )}
 
-                                    {/* Review Text */}
-                                    <p className="text-gray-300 text-sm mb-3 flex-1 line-clamp-2">
-                                        "{review.text}"
-                                    </p>
+                    {/* Reviews Grid - Plynulá slideshow */}
+                    <div className="overflow-hidden">
+                        <div
+                            className="flex transition-transform duration-700 ease-in-out"
+                            style={{
+                                transform: `translateX(-${(currentIndex / itemsPerView) * 100}%)`,
+                            }}
+                        >
+                            {reviews.map((review) => (
+                                <div
+                                    key={review.id}
+                                    className="flex-shrink-0 px-3"
+                                    style={{ width: `${100 / itemsPerView}%` }}
+                                >
+                                    <div className="bg-[#161616] rounded-2xl p-6 border border-[#161616] hover:border-[#161616] transition-all h-full flex flex-col">
+                                        {/* Rating Stars */}
+                                        <div className="flex items-center gap-1 mb-3">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star
+                                                    key={i}
+                                                    size={16}
+                                                    className={i < review.rating ? 'fill-[#fbbc04] text-[#fbbc04]' : 'fill-gray-600 text-gray-600'}
+                                                />
+                                            ))}
+                                        </div>
 
-                                    {/* Author & Date */}
-                                    <div className="text-xs text-gray-500 border-t border-[#161616] pt-2">
-                                        <div className="font-semibold text-gray-400">{review.author}</div>
-                                        <div>{new Date(review.date).toLocaleDateString('cs-CZ')}</div>
+                                        {/* Review Text */}
+                                        <p className="text-gray-300 text-sm mb-3 flex-1 line-clamp-2">
+                                            "{review.text}"
+                                        </p>
+
+                                        {/* Author & Date */}
+                                        <div className="text-xs text-gray-500 border-t border-[#161616] pt-2">
+                                            <div className="font-semibold text-gray-400">{review.author}</div>
+                                            <div>{new Date(review.date).toLocaleDateString('cs-CZ')}</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -168,4 +168,3 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
         </div>
     );
 }
-

@@ -90,25 +90,25 @@ export default function SkinDetailPage() {
             <div
                 className="fixed inset-0 z-0"
                 style={{
-                    backgroundImage: 'url("/bg-front-left2.png")',
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'left center',
+                    backgroundImage: 'url("/bg-front-left3.png")',
+                    backgroundSize: '70% auto',
+                    backgroundPosition: 'left top',
                     backgroundRepeat: 'no-repeat',
-                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
-                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 60%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 60%)'
                 }}
             />
             {/* Background Image - Right (Mirrored) */}
             <div
                 className="fixed inset-0 z-0"
                 style={{
-                    backgroundImage: 'url("/bg-front-left2.png")',
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'left center',
+                    backgroundImage: 'url("/bg-front-left3.png")',
+                    backgroundSize: '70% auto',
+                    backgroundPosition: 'left top',
                     backgroundRepeat: 'no-repeat',
                     transform: 'scaleX(-1)',
-                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 100%)',
-                    maskImage: 'linear-gradient(to right, black 20%, transparent 100%)'
+                    WebkitMaskImage: 'linear-gradient(to right, black 20%, transparent 60%)',
+                    maskImage: 'linear-gradient(to right, black 20%, transparent 60%)'
                 }}
             />
             <div className="fixed inset-0 z-0 bg-black/91" />
