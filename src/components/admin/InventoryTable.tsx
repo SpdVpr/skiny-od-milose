@@ -43,6 +43,11 @@ export default function InventoryTable() {
     const [editingSkin, setEditingSkin] = useState<Skin | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
 
+    // Edit form localized state for split name
+    const [editWeaponType, setEditWeaponType] = useState('');
+    const [editSkinName, setEditSkinName] = useState('');
+    const [editIsStatTrak, setEditIsStatTrak] = useState(false);
+
     // Sticker management state
     const [stickerSearchQuery, setStickerSearchQuery] = useState<string[]>([]);
     const [showStickerDropdown, setShowStickerDropdown] = useState<number | null>(null);
@@ -197,6 +202,36 @@ export default function InventoryTable() {
 
     const openEditModal = (skin: Skin) => {
         setEditingSkin({ ...skin });
+
+        // Detect StatTrak
+        const isStatTrak = skin.name.includes('StatTrak™');
+        setEditIsStatTrak(isStatTrak);
+
+        // Clean name for splitting (remove StatTrak prefix and trim)
+        let cleanName = skin.name.replace('StatTrak™', '').trim();
+
+        // Initialize split name fields
+        // 1. Try to use existing database structure
+        if (skin.weaponType) {
+            setEditWeaponType(skin.weaponType);
+            // If cleanName contains weaponType, remove it to get skinName
+            if (cleanName.startsWith(skin.weaponType + ' | ')) {
+                setEditSkinName(cleanName.substring(skin.weaponType.length + 3));
+            } else {
+                setEditSkinName(cleanName);
+            }
+        } else {
+            // 2. Fallback: Parse from string split if weaponType is missing
+            const parts = cleanName.split(' | ');
+            if (parts.length >= 2) {
+                setEditWeaponType(parts[0]);
+                setEditSkinName(parts.slice(1).join(' | '));
+            } else {
+                setEditWeaponType(cleanName); // Default to whole name as type if no split
+                setEditSkinName('');
+            }
+        }
+
         setShowEditModal(true);
     };
 
@@ -266,8 +301,12 @@ export default function InventoryTable() {
 
         try {
             // Připravíme data bez undefined hodnot
+            const prefix = editIsStatTrak ? 'StatTrak™ ' : '';
+            const finalName = `${prefix}${editWeaponType.trim()} | ${editSkinName.trim()}`;
+
             const updateData: any = {
-                name: editingSkin.name,
+                name: finalName,
+                weaponType: editWeaponType.trim(),
                 updatedAt: Timestamp.now(), // Aktualizujeme čas poslední úpravy
             };
 
@@ -309,7 +348,7 @@ export default function InventoryTable() {
             await updateDoc(doc(db, 'skins', editingSkin.assetId), updateData);
 
             setSkins(prev => prev.map(s =>
-                s.assetId === editingSkin.assetId ? { ...s, ...updateData } : s
+                s.assetId === editingSkin.assetId ? { ...s, ...updateData, name: finalName, weaponType: editWeaponType.trim() } : s
             ));
 
             toast.success('Produkt úspěšně upraven!');
@@ -909,17 +948,49 @@ export default function InventoryTable() {
                         </div>
 
                         <div className="p-6 space-y-4">
-                            {/* Název */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Název
-                                </label>
+                            {/* Název - Split into two fields */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Typ zbraně (Weapon Type)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editWeaponType}
+                                        onChange={(e) => setEditWeaponType(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                                        placeholder="např. AK-47"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Název skinu (Skin Name)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editSkinName}
+                                        onChange={(e) => setEditSkinName(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                                        placeholder="např. Redline"
+                                    />
+                                </div>
+                            </div>
+                            <div className="text-xs text-gray-500 -mt-2 mb-2">
+                                Výsledek: <span className="font-semibold">{editIsStatTrak ? 'StatTrak™ ' : ''}{editWeaponType} | {editSkinName}</span>
+                            </div>
+
+                            {/* StatTrak checkbox */}
+                            <div className="flex items-center gap-2">
                                 <input
-                                    type="text"
-                                    value={editingSkin.name}
-                                    onChange={(e) => setEditingSkin({ ...editingSkin, name: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                                    type="checkbox"
+                                    id="edit-statTrak"
+                                    checked={editIsStatTrak}
+                                    onChange={(e) => setEditIsStatTrak(e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
+                                <label htmlFor="edit-statTrak" className="text-sm text-gray-700 font-medium">
+                                    StatTrak™
+                                </label>
                             </div>
 
                             {/* Cena */}

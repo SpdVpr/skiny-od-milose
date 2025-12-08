@@ -40,6 +40,7 @@ export default function SkinCard({ skin }: SkinProps) {
                     className="w-full h-full transform group-hover:scale-110 transition-transform duration-500"
                     showStickers={true}
                     cropTop={180}
+                    imageObjectPosition="center 17%"
                 />
 
 
@@ -90,21 +91,23 @@ export default function SkinCard({ skin }: SkinProps) {
                                 <h4 className="text-white text-base leading-tight mb-2">
                                     {cleanName.split('|')[1].trim()}
                                 </h4>
-                                <div className="flex gap-4 text-xs text-white opacity-90">
-                                    {skin.floatValue !== undefined && (
-                                        <span>Float: {SkinUtils.formatFloat(skin.floatValue)}</span>
-                                    )}
-                                    {skin.paintSeed !== undefined && (
-                                        <span>Pattern: {skin.paintSeed}</span>
-                                    )}
-                                </div>
                             </>
                         ) : (
-                            <h3 className="font-bold text-white text-lg leading-tight">
+                            <h3 className="font-bold text-white text-lg leading-tight mb-2">
                                 {cleanName}
                             </h3>
                         );
                     })()}
+
+                    <div className="flex gap-4 text-xs text-white opacity-90">
+                        {skin.floatValue !== undefined && (
+                            <span>Float: {SkinUtils.formatFloat(skin.floatValue)}</span>
+                        )}
+                        {skin.paintSeed !== undefined && (
+                            <span>Pattern: {skin.paintSeed}</span>
+                        )}
+                    </div>
+
                 </div>
 
             </div>

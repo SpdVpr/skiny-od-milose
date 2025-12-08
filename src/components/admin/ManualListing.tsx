@@ -52,7 +52,9 @@ export default function ManualListing() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Form state
-  const [weaponName, setWeaponName] = useState('');
+  // const [weaponName, setWeaponName] = useState(''); // REPLACED
+  const [weaponType, setWeaponType] = useState('');
+  const [skinName, setSkinName] = useState('');
   const [wear, setWear] = useState('Field-Tested');
   const [patternSeed, setPatternSeed] = useState('');
   const [phase, setPhase] = useState('');
@@ -235,8 +237,12 @@ export default function ManualListing() {
     e.preventDefault();
 
     // Validace
-    if (!weaponName.trim()) {
-      toast.error('Zadejte název zbraně!');
+    if (!weaponType.trim()) {
+      toast.error('Zadejte typ zbraně!');
+      return;
+    }
+    if (!skinName.trim()) {
+      toast.error('Zadejte název skinu!');
       return;
     }
     if (!patternSeed.trim()) {
@@ -251,7 +257,8 @@ export default function ManualListing() {
 
       // Vytvoříme market hash name
       const prefix = isStatTrak ? 'StatTrak™ ' : '';
-      const marketHashName = `${prefix}${weaponName} (${wear})`;
+      const fullName = `${weaponType.trim()} | ${skinName.trim()}`;
+      const marketHashName = `${prefix}${fullName} (${wear})`;
 
       // Vygenerujeme assetId (timestamp + random)
       const assetId = `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -342,7 +349,7 @@ export default function ManualListing() {
         phase: phase.trim() || undefined,
 
         // Kategorizace
-        weaponType: weaponName,
+        weaponType: weaponType.trim(),
         category: category, // Uživatelem vybraná kategorie
         rarity: 'Classified',
 
@@ -376,7 +383,8 @@ export default function ManualListing() {
       toast.success('Skin úspěšně přidán!');
 
       // Reset formuláře
-      setWeaponName('');
+      setWeaponType('');
+      setSkinName('');
       setWear('Field-Tested');
       setPatternSeed('');
       setPhase('');
@@ -429,23 +437,38 @@ export default function ManualListing() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Název zbraně */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Název zbraně *
-                  </label>
-                  <input
-                    type="text"
-                    value={weaponName}
-                    onChange={(e) => setWeaponName(e.target.value)}
-                    placeholder="např. AK-47 | Redline"
-                    className="w-full px-4 py-2 bg-[#0f1117] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Zadejte název bez opotřebení a StatTrak (např. "AK-47 | Redline")
-                  </p>
+                {/* Název zbraně - Split into two fields */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Typ zbraně *
+                    </label>
+                    <input
+                      type="text"
+                      value={weaponType}
+                      onChange={(e) => setWeaponType(e.target.value)}
+                      placeholder="např. AK-47"
+                      className="w-full px-4 py-2 bg-[#0f1117] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Název skinu *
+                    </label>
+                    <input
+                      type="text"
+                      value={skinName}
+                      onChange={(e) => setSkinName(e.target.value)}
+                      placeholder="např. Redline"
+                      className="w-full px-4 py-2 bg-[#0f1117] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                      required
+                    />
+                  </div>
                 </div>
+                <p className="text-xs text-gray-500 -mt-2">
+                  Výsledek bude: "{weaponType} | {skinName}"
+                </p>
 
                 {/* StatTrak checkbox */}
                 <div className="flex items-center gap-2">
