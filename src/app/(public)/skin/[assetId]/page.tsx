@@ -221,6 +221,15 @@ export default function SkinDetailPage() {
                                 )}
                             </div>
 
+                            {/* Price Disclaimer - MOVED UP */}
+                            <div className="mt-3 mb-3 pt-3 border-t border-[#161616] text-center">
+                                <p className="text-xs text-gray-500 italic">
+                                    Tato cena je pouze orientační a je nutné jí ověřit.
+                                    <br />
+                                    Nacenění skinů vychází z prodejních dat nejověřenějších obchodních stránek.
+                                </p>
+                            </div>
+
                             {/* Tradable/Marketable Status */}
                             {(skin.tradable !== undefined || skin.marketable !== undefined) && (() => {
                                 // Check if trade restriction date has passed
@@ -260,14 +269,7 @@ export default function SkinDetailPage() {
                                 );
                             })()}
 
-                            {/* Price Disclaimer */}
-                            <div className="mt-3 pt-3 border-t border-[#161616] text-center">
-                                <p className="text-xs text-gray-500 italic">
-                                    Tato cena je pouze orientační a je nutné jí ověřit.
-                                    <br />
-                                    Nacenění skinů vychází z prodejních dat nejověřenějších obchodních stránek.
-                                </p>
-                            </div>
+
                         </div>
 
 

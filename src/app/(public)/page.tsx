@@ -238,8 +238,7 @@ export default function HomePage() {
                                         Tisíce uzavřených obchodů a stovky spokojených zákazníků.
                                     </p>
                                     <p className="text-base text-gray-300">
-                                        S Vámi už od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry<br />
-                                        <span className="block mt-1">Counter Strike 2.</span>
+                                        S Vámi od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.<br />                                  
                                     </p>
                                 </div>
                                 <div className="flex flex-col items-center gap-4 mt-6">
