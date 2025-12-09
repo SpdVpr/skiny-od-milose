@@ -80,7 +80,15 @@ export default function HomePage() {
     // Mapování Steam kategorií na naše kategorie
     const mapSteamCategory = (steamCategory: string): string => {
         const lower = steamCategory.toLowerCase();
-        // Steam API používá různé názvy, musíme je mapovat
+
+        // 1. Zkontrolujeme, zda to není už naše interní ID (z admin panelu)
+        // Použijeme type assertion nebo find, protože CATEGORIES je const array
+        const isInternalId = CATEGORIES.some(c => c.id === lower);
+        if (isInternalId && lower !== 'all') {
+            return lower;
+        }
+
+        // 2. Mapování Steam názvů
         if (lower === 'melee' || lower === 'knife') return 'knife';
         if (lower === 'pistol') return 'pistol';
         if (lower === 'rifle') return 'rifle';
@@ -88,7 +96,7 @@ export default function HomePage() {
         if (lower === 'smg' || lower === 'submachine gun') return 'smg';
         if (lower === 'gloves') return 'gloves';
         if (lower === 'agent') return 'agent';
-        // Add more mappings if needed for "other"
+
         return 'other'; // Default to other if no specific match
     };
 
@@ -147,18 +155,18 @@ export default function HomePage() {
         if (skin.category) {
             // Máme kategorii ze Steamu nebo manuálně - zmapujeme ji
             skinCategory = mapSteamCategory(skin.category);
-            // Debug: Vypíšeme kategorii pro nože
-            if (skin.name.toLowerCase().includes('knife') || skin.name.toLowerCase().includes('karambit') || skin.name.toLowerCase().includes('bayonet')) {
-                console.log(`🔪 [FILTER] Nůž: ${skin.name}, Steam category: "${skin.category}", Mapped: "${skinCategory}"`);
+        }
+
+        // Pokud mapování nevrátilo nic nebo je 'other', zkusíme určit podle názvu
+        if (!skinCategory || skinCategory === 'other') {
+            const nameCategory = getCategoryFromName(skin.name);
+            if (nameCategory !== 'other') {
+                skinCategory = nameCategory;
             }
         }
-        // Pokud mapování nevrátilo nic, zkusíme určit podle názvu
-        if (!skinCategory) {
-            skinCategory = getCategoryFromName(skin.name);
-            if (skin.name.toLowerCase().includes('knife') || skin.name.toLowerCase().includes('karambit') || skin.name.toLowerCase().includes('bayonet')) {
-                console.log(`🔪 [FILTER] Nůž (fallback): ${skin.name}, Category from name: "${skinCategory}"`);
-            }
-        }
+
+        // Debug log pro první skin nebo všechny pro diagnostiku
+        // console.log(`[FILTER] Skin: ${skin.name}, Raw Category: ${skin.category}, Mapped: ${skinCategory}, Selected: ${selectedCategory}`);
 
         // Pokud je vybraná kategorie 'all', zobrazíme vše
         // Jinak musí kategorie odpovídat
