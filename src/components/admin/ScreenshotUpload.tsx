@@ -60,7 +60,7 @@ export default function ScreenshotUpload({
       setPreviewUrl(downloadUrl);
       toast.dismiss();
       toast.success('Screenshot úspěšně nahrán!');
-      
+
       if (onUploadComplete) {
         onUploadComplete(downloadUrl);
       }
@@ -86,7 +86,19 @@ export default function ScreenshotUpload({
       // Smažeme z Storage
       const finalStoragePath = storagePath || `skins/${skinId}/screenshot.jpg`;
       const storageRef = ref(storage, finalStoragePath);
-      await deleteObject(storageRef);
+
+      try {
+        await deleteObject(storageRef);
+      } catch (error: any) {
+        // Pokud soubor neexistuje (např. u kopie skinu, která odkazuje na obrázek originálu,
+        // ale my se snažíme smazat soubor na cestě nového ID), budeme to ignorovat
+        // a pouze smažeme referenci v databázi.
+        if (error.code === 'storage/object-not-found') {
+          console.warn('File not found in storage (likely a copy), clearing DB reference only.');
+        } else {
+          throw error;
+        }
+      }
 
       // Smažeme URL z Firestore
       await updateDoc(doc(db, 'skins', skinId), {
@@ -96,7 +108,7 @@ export default function ScreenshotUpload({
       setPreviewUrl(null);
       toast.dismiss();
       toast.success('Screenshot smazán!');
-      
+
       if (onUploadComplete) {
         onUploadComplete('');
       }
