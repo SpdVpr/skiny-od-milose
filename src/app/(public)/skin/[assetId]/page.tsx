@@ -113,7 +113,7 @@ export default function SkinDetailPage() {
             />
             <div className="fixed inset-0 z-0 bg-black/86" />
 
-            <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden" style={{ maxWidth: '1500px', maxHeight: '950px' }}>
+            <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ maxWidth: '1500px' }}>
                 {/* Back Button */}
                 <button
                     onClick={() => router.back()}
@@ -131,8 +131,7 @@ export default function SkinDetailPage() {
                             2. Jinak: Custom Screenshot OR Steam Image
                         */}
                         <div
-                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start"
-                            style={{ maxHeight: '850px' }}
+                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start h-[50vh] lg:h-auto lg:max-h-[850px]"
                         >
                             {skin.detailImageUrl ? (
                                 <>
@@ -301,7 +300,7 @@ export default function SkinDetailPage() {
                                     <Shield size={20} className="text-gray-400" />
                                     Stickery ({skin.stickers.length})
                                 </h3>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {skin.stickers.map((sticker, idx) => (
                                         <div
                                             key={idx}
