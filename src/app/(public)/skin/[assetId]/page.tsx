@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { Skin, SkinUtils } from '@/types/skin';
-import { ArrowLeft, ExternalLink, Award, Hash, Tag, TrendingUp, Shield, Calendar, ArrowLeftRight, Facebook } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Award, Hash, Tag, TrendingUp, Shield, Calendar, ArrowLeftRight, Facebook, X } from 'lucide-react';
 import SkinStats from '@/components/SkinStats';
 import SkinImageWithStickers from '@/components/SkinImageWithStickers';
 
@@ -19,6 +19,7 @@ export default function SkinDetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [currency, setCurrency] = useState<'CZK' | 'EUR'>('CZK');
     const [exchangeRate, setExchangeRate] = useState<number>(25);
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchSkin = async () => {
@@ -131,7 +132,8 @@ export default function SkinDetailPage() {
                             2. Jinak: Custom Screenshot OR Steam Image
                         */}
                         <div
-                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start h-[50vh] lg:h-auto lg:max-h-[850px]"
+                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start h-[50vh] lg:h-auto lg:max-h-[850px] cursor-pointer"
+                            onClick={() => setIsImageModalOpen(true)}
                         >
                             {skin.detailImageUrl ? (
                                 <>
@@ -361,6 +363,42 @@ export default function SkinDetailPage() {
                     </div>
                 </div>
             </div>
+            {/* Image Modal */}
+            {isImageModalOpen && skin && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() => setIsImageModalOpen(false)}
+                >
+                    <button
+                        onClick={() => setIsImageModalOpen(false)}
+                        className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-50 bg-black/50 p-2 rounded-full"
+                    >
+                        <X size={32} />
+                    </button>
+
+                    <div
+                        className="relative w-full h-full flex items-center justify-center pointer-events-none"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {skin.detailImageUrl ? (
+                            <img
+                                src={skin.detailImageUrl}
+                                alt={`${skin.name} - Fullscreen`}
+                                className="max-w-full max-h-full object-contain pointer-events-auto"
+                            />
+                        ) : (
+                            <SkinImageWithStickers
+                                skin={skin}
+                                className="w-full h-full pointer-events-auto"
+                                showStickers={true}
+                                cropTop={0}
+                                imageObjectFit="contain"
+                                imageObjectPosition="center center"
+                            />
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

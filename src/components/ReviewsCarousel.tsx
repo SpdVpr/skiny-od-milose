@@ -18,6 +18,8 @@ interface ReviewsCarouselProps {
 export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
     // Počet recenzí zobrazených najednou (responzivní)
     const [itemsPerView, setItemsPerView] = useState(4);
@@ -70,6 +72,34 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
         });
     };
 
+    // Touch handlers for swipe
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+        setIsAutoPlaying(false);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            goToNext();
+        }
+        if (isRightSwipe) {
+            goToPrevious();
+        }
+    };
+
     if (reviews.length === 0) {
         return (
             <div className="text-center py-12">
@@ -81,7 +111,11 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
     return (
         <div className="relative">
             {/* Carousel Container */}
-            <div className="relative">
+            <div className="relative"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+            >
                 {/* Inner Container for Grid + Buttons to center buttons relative to grid */}
                 <div className="relative">
                     {/* Navigation Buttons */}
@@ -89,14 +123,14 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                         <>
                             <button
                                 onClick={goToPrevious}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-[#161616]/20 hover:bg-white hover:text-black hover:scale-110 border border-[#161616] text-white p-3 rounded-full shadow-lg transition-all backdrop-blur-sm"
+                                className="hidden lg:block absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-[#161616]/20 hover:bg-white hover:text-black hover:scale-110 border border-[#161616] text-white p-3 rounded-full shadow-lg transition-all backdrop-blur-sm"
                                 aria-label="Previous reviews"
                             >
                                 <ChevronLeft size={24} />
                             </button>
                             <button
                                 onClick={goToNext}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-[#161616]/20 hover:bg-white hover:text-black hover:scale-110 border border-[#161616] text-white p-3 rounded-full shadow-lg transition-all backdrop-blur-sm"
+                                className="hidden lg:block absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-[#161616]/20 hover:bg-white hover:text-black hover:scale-110 border border-[#161616] text-white p-3 rounded-full shadow-lg transition-all backdrop-blur-sm"
                                 aria-label="Next reviews"
                             >
                                 <ChevronRight size={24} />
