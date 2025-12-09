@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { Skin, SkinUtils } from '@/types/skin';
-import { ArrowLeft, ExternalLink, Award, Hash, Tag, TrendingUp, Shield, Calendar, ArrowLeftRight } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Award, Hash, Tag, TrendingUp, Shield, Calendar, ArrowLeftRight, Facebook } from 'lucide-react';
 import SkinStats from '@/components/SkinStats';
 import SkinImageWithStickers from '@/components/SkinImageWithStickers';
 
@@ -132,7 +132,7 @@ export default function SkinDetailPage() {
                         */}
                         <div
                             className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start"
-                            style={{ maxHeight: '864px' }}
+                            style={{ maxHeight: '850px' }}
                         >
                             {skin.detailImageUrl ? (
                                 <>
@@ -257,6 +257,19 @@ export default function SkinDetailPage() {
                                     </div>
                                 );
                             })()}
+
+                            {/* Contact Button */}
+                            <div className="mt-4 pt-4 border-t border-[#161616] flex justify-center">
+                                <a
+                                    href="https://www.facebook.com/skinyodmilose"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg"
+                                >
+                                    <Facebook size={20} />
+                                    Kontaktuj mě
+                                </a>
+                            </div>
 
 
                         </div>

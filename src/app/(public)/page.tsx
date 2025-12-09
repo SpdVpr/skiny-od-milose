@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import SkinCard from '@/components/SkinCard';
 import ReviewsCarousel from '@/components/ReviewsCarousel';
-import { Search, Facebook } from 'lucide-react';
+import { Search, Facebook, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { Skin } from '@/types/skin';
 
@@ -300,15 +300,19 @@ export default function HomePage() {
                             </div>
 
                             {/* Sort Dropdown */}
-                            <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                                className="px-4 py-2.5 bg-[#161616] border border-[#161616] text-white rounded-xl focus:outline-none focus:border-gray-500 transition-all cursor-pointer"
-                            >
-                                <option value="newest">Nejnovější</option>
-                                <option value="tradable">Tradable</option>
-                                <option value="alphabetical">Abecedně</option>
-                            </select>
+                            {/* Sort Dropdown */}
+                            <div className="relative">
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                                    className="pl-4 pr-12 py-2.5 bg-[#161616] border border-[#161616] text-white rounded-xl focus:outline-none focus:border-gray-500 transition-all cursor-pointer appearance-none"
+                                >
+                                    <option value="newest">Nejnovější</option>
+                                    <option value="tradable">Tradable</option>
+                                    <option value="alphabetical">Abecedně</option>
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+                            </div>
                         </div>
 
                         {/* Categories */}
