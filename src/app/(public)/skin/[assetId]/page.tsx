@@ -145,17 +145,6 @@ export default function SkinDetailPage() {
                                         />
                                     </div>
                                 </>
-                            ) : skin.customScreenshotUrl ? (
-                                <>
-                                    <div className="flex-1 min-h-0 flex items-start justify-center">
-                                        <img
-                                            src={skin.customScreenshotUrl}
-                                            alt={`${skin.name} - Screenshot ze hry`}
-                                            className="h-full object-cover object-top rounded-lg"
-                                            style={{ width: '70%' }}
-                                        />
-                                    </div>
-                                </>
                             ) : (
                                 <div className="relative rounded-lg overflow-hidden h-full flex items-center justify-center w-full">
                                     <SkinImageWithStickers
@@ -164,7 +153,7 @@ export default function SkinDetailPage() {
                                         showStickers={true}
                                         cropTop={0}
                                         imageObjectFit="cover"
-                                        imageObjectPosition="center center"
+                                        imageObjectPosition="center top"
                                     />
                                 </div>
                             )}
@@ -185,7 +174,7 @@ export default function SkinDetailPage() {
                         {/* Price - Always First */}
                         <div className="bg-[#161616] text-white rounded-xl p-3 shadow-lg border border-[#161616]">
                             <div className="flex items-center justify-center gap-3 mb-2">
-                                <span className="text-lg font-medium text-gray-400">Cena</span>
+                                <span className="text-lg font-medium text-white">Cena</span>
                             </div>
                             <div className="flex items-center justify-center gap-4 mb-2">
                                 <div className="text-2xl font-bold text-center">
@@ -223,7 +212,7 @@ export default function SkinDetailPage() {
 
                             {/* Price Disclaimer - MOVED UP */}
                             <div className="mt-3 mb-3 pt-3 border-t border-[#161616] text-center">
-                                <p className="text-xs text-gray-500 italic">
+                                <p className="text-sm text-white italic">
                                     Tato cena je pouze orientační a je nutné jí ověřit.
                                     <br />
                                     Nacenění skinů vychází z prodejních dat nejověřenějších obchodních stránek.

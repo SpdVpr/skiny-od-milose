@@ -39,8 +39,9 @@ export default function SkinCard({ skin }: SkinProps) {
                     skin={skin}
                     className="w-full h-full transform group-hover:scale-110 transition-transform duration-500"
                     showStickers={true}
-                    cropTop={180}
-                    imageObjectPosition="center 17%"
+                    cropTop={0}
+                    imageObjectFit="contain"
+                    imageObjectPosition="center center"
                 />
 
 

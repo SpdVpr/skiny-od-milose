@@ -196,14 +196,14 @@ export const SkinUtils = {
       return this.getHighResImageUrl(skin);
     }
 
-    // Pokud NEMÁ Steam obrázek → použijeme detailImageUrl jako náhledový
-    if (skin.detailImageUrl) {
-      return skin.detailImageUrl;
-    }
-
-    // Fallback: customScreenshotUrl nebo placeholder
+    // Pokud NEMÁ Steam obrázek → použijeme customScreenshotUrl jako náhledový
     if (skin.customScreenshotUrl) {
       return skin.customScreenshotUrl;
+    }
+
+    // Fallback: detailImageUrl nebo placeholder
+    if (skin.detailImageUrl) {
+      return skin.detailImageUrl;
     }
 
     return this.getHighResImageUrl(skin);
