@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Review {
     id: string;
@@ -156,11 +156,18 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                         {/* Rating Stars */}
                                         <div className="flex items-center gap-1 mb-3">
                                             {[...Array(5)].map((_, i) => (
-                                                <Star
+                                                <svg
                                                     key={i}
-                                                    size={16}
-                                                    className={i < review.rating ? 'fill-[#fbbc04] text-[#fbbc04]' : 'fill-gray-600 text-gray-600'}
-                                                />
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    className="transition-colors"
+                                                >
+                                                    <path
+                                                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                                                        fill={i < review.rating ? 'white' : '#333333'}
+                                                    />
+                                                </svg>
                                             ))}
                                         </div>
 

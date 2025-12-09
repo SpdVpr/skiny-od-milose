@@ -27,7 +27,7 @@ service cloud.firestore {
     // Kolekce settings (pro měnové kurzy)
     match /settings/{document=**} {
       allow read: if true;
-      allow write: if false; // Zápis pouze admin přes konzoli nebo pokud přidáš auth pravidla
+      allow write: if true;
     }
 
     // Kolekce reviews
