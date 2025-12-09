@@ -345,14 +345,14 @@ export default function SkinDetailPage() {
                             >
                                 <div className="text-center">
                                     <div className="text-sm font-bold mb-2">
-                                        🎮 Prohlédnout ve hře CS:GO
+                                        🎮 Prohlédnout ve hře CS2
                                     </div>
                                     <div className="text-xs opacity-90">
                                         Otevře se vám hra s přesným náhledem
                                     </div>
                                     <div className="flex items-center justify-center gap-2 mt-3">
                                         <ExternalLink size={18} />
-                                        <span className="font-bold">Otevřít CS:GO</span>
+                                        <span className="font-bold">Otevřít CS2</span>
                                     </div>
                                 </div>
                             </a>
