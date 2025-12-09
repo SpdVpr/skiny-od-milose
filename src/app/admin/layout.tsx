@@ -1,13 +1,28 @@
 import React from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, Package, Settings, LogOut, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, MessageSquare } from 'lucide-react';
 import { Toaster } from 'sonner';
+import { cookies } from 'next/headers';
+import LoginPage from '@/components/admin/LoginPage';
+import LogoutButton from '@/components/admin/LogoutButton';
 
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const cookieStore = await cookies();
+    const isAuthenticated = cookieStore.get('admin_authenticated')?.value === 'true';
+
+    if (!isAuthenticated) {
+        return (
+            <>
+                <LoginPage />
+                <Toaster />
+            </>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 flex">
             {/* Sidebar */}
@@ -37,10 +52,7 @@ export default function AdminLayout({
                 </nav>
 
                 <div className="p-4 border-t border-slate-800">
-                    <button className="flex items-center gap-3 px-4 py-3 w-full text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
-                        <LogOut size={20} />
-                        Logout
-                    </button>
+                    <LogoutButton />
                 </div>
             </aside>
 

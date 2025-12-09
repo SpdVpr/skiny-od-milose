@@ -10,6 +10,7 @@ interface SkinImageWithStickersProps {
   cropTop?: number; // Počet pixelů k ořezu z horní části obrázku
   imageObjectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   imageObjectPosition?: string;
+  imageClassName?: string;
 }
 
 /**
@@ -22,7 +23,8 @@ export default function SkinImageWithStickers({
   showStickers = true,
   cropTop = 0,
   imageObjectFit = 'cover',
-  imageObjectPosition = 'center 35%'
+  imageObjectPosition = 'center 35%',
+  imageClassName = ''
 }: SkinImageWithStickersProps) {
   const [stickerImages, setStickerImages] = useState<Record<string, string>>({});
   const [imageError, setImageError] = useState(false);
@@ -137,7 +139,7 @@ export default function SkinImageWithStickers({
         <img
           src={baseImageUrl}
           alt={skin.name || 'Skin'}
-          className="w-full h-full"
+          className={`w-full h-full ${imageClassName}`}
           style={{
             objectFit: imageObjectFit,
             objectPosition: imageObjectPosition,

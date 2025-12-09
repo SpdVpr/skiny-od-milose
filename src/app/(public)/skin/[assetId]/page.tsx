@@ -153,6 +153,7 @@ export default function SkinDetailPage() {
                                         cropTop={0}
                                         imageObjectFit="cover"
                                         imageObjectPosition="center top"
+                                        imageClassName="!object-contain lg:!object-cover"
                                     />
                                 </div>
                             )}
