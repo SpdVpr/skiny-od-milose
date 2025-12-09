@@ -118,7 +118,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
                                     className="flex-shrink-0 px-3"
                                     style={{ width: `${100 / itemsPerView}%` }}
                                 >
-                                    <div className="bg-[#161616] rounded-2xl p-6 border border-[#161616] hover:border-[#161616] transition-all h-full flex flex-col">
+                                    <div className="bg-[#161616]/20 rounded-2xl p-6 border border-[#161616]/50 hover:border-[#161616] transition-all h-full flex flex-col backdrop-blur-sm">
                                         {/* Rating Stars */}
                                         <div className="flex items-center gap-1 mb-3">
                                             {[...Array(5)].map((_, i) => (
