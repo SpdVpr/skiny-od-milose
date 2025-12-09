@@ -111,7 +111,7 @@ export default function SkinDetailPage() {
                     maskImage: 'linear-gradient(to right, black 20%, transparent 60%)'
                 }}
             />
-            <div className="fixed inset-0 z-0 bg-black/91" />
+            <div className="fixed inset-0 z-0 bg-black/86" />
 
             <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden" style={{ maxWidth: '1500px', maxHeight: '950px' }}>
                 {/* Back Button */}

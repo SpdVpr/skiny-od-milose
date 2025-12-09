@@ -209,7 +209,7 @@ export default function HomePage() {
                     maskImage: 'linear-gradient(to right, black 20%, transparent 60%)',
                 }}
             />
-            <div className="fixed inset-0 z-0 bg-black/91" />
+            <div className="fixed inset-0 z-0 bg-black/86" />
 
             {/* Content Wrapper */}
             <div className="relative z-10">
