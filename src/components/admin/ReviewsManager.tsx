@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, Timestamp, query, orderBy } from 'firebase/firestore';
-import { Star, Trash2, Plus } from 'lucide-react';
+import { collection, addDoc, getDocs, deleteDoc, doc, Timestamp, query, orderBy, updateDoc } from 'firebase/firestore';
+import { Star, Trash2, Plus, Edit, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Review {
@@ -18,13 +18,14 @@ interface Review {
 export default function ReviewsManager() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showAddForm, setShowAddForm] = useState(false);
+    const [showForm, setShowForm] = useState(false);
 
     // Form state
     const [author, setAuthor] = useState('');
     const [rating, setRating] = useState(5);
     const [text, setText] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     useEffect(() => {
         loadReviews();
@@ -47,7 +48,7 @@ export default function ReviewsManager() {
         }
     };
 
-    const handleAddReview = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!author.trim() || !text.trim()) {
@@ -56,25 +57,55 @@ export default function ReviewsManager() {
         }
 
         try {
-            await addDoc(collection(db, 'reviews'), {
-                author: author.trim(),
-                rating,
-                text: text.trim(),
-                date,
-                createdAt: Timestamp.now(),
-            });
+            if (editingId) {
+                // Update existing review
+                await updateDoc(doc(db, 'reviews', editingId), {
+                    author: author.trim(),
+                    rating,
+                    text: text.trim(),
+                    date,
+                    // keep original createdAt
+                });
+                toast.success('Recenze upravena!');
+            } else {
+                // Add new review
+                await addDoc(collection(db, 'reviews'), {
+                    author: author.trim(),
+                    rating,
+                    text: text.trim(),
+                    date,
+                    createdAt: Timestamp.now(),
+                });
+                toast.success('Recenze přidána!');
+            }
 
-            toast.success('Recenze přidána!');
-            setAuthor('');
-            setRating(5);
-            setText('');
-            setDate(new Date().toISOString().split('T')[0]);
-            setShowAddForm(false);
+            resetForm();
             loadReviews();
         } catch (error) {
-            console.error('Error adding review:', error);
-            toast.error('Chyba při přidávání recenze');
+            console.error('Error saving review:', error);
+            toast.error('Chyba při ukládání recenze');
         }
+    };
+
+    const handleEditClick = (review: Review) => {
+        setAuthor(review.author);
+        setRating(review.rating);
+        setText(review.text);
+        setDate(review.date);
+        setEditingId(review.id);
+        setShowForm(true);
+
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const resetForm = () => {
+        setAuthor('');
+        setRating(5);
+        setText('');
+        setDate(new Date().toISOString().split('T')[0]);
+        setEditingId(null);
+        setShowForm(false);
     };
 
     const handleDeleteReview = async (id: string) => {
@@ -99,19 +130,35 @@ export default function ReviewsManager() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-white">Správa recenzí</h2>
-                <button
-                    onClick={() => setShowAddForm(!showAddForm)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <Plus size={20} />
-                    Přidat recenzi
-                </button>
+                {!showForm && (
+                    <button
+                        onClick={() => {
+                            resetForm();
+                            setShowForm(true);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <Plus size={20} />
+                        Přidat recenzi
+                    </button>
+                )}
             </div>
 
-            {/* Add Form */}
-            {showAddForm && (
-                <form onSubmit={handleAddReview} className="bg-gray-900 rounded-xl p-6 border border-gray-800 space-y-4">
-                    <h3 className="text-xl font-bold text-white mb-4">Nová recenze</h3>
+            {/* Form */}
+            {showForm && (
+                <form onSubmit={handleSubmit} className="bg-gray-900 rounded-xl p-6 border border-gray-800 space-y-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold text-white">
+                            {editingId ? 'Upravit recenzi' : 'Nová recenze'}
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="text-gray-400 hover:text-white transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
 
                     {/* Author */}
                     <div>
@@ -179,16 +226,17 @@ export default function ReviewsManager() {
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 pt-2">
                         <button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
                         >
-                            Přidat recenzi
+                            {editingId ? <Edit size={18} /> : <Plus size={18} />}
+                            {editingId ? 'Uložit změny' : 'Přidat recenzi'}
                         </button>
                         <button
                             type="button"
-                            onClick={() => setShowAddForm(false)}
+                            onClick={resetForm}
                             className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
                         >
                             Zrušit
@@ -205,9 +253,9 @@ export default function ReviewsManager() {
                     </div>
                 ) : (
                     reviews.map((review) => (
-                        <div key={review.id} className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                        <div key={review.id} className="bg-gray-900 rounded-xl p-6 border border-gray-800 transition-colors hover:border-gray-700">
                             <div className="flex items-start justify-between">
-                                <div className="flex-1">
+                                <div className="flex-1 pr-4">
                                     {/* Rating */}
                                     <div className="flex items-center gap-1 mb-2">
                                         {[...Array(5)].map((_, i) => (
@@ -220,24 +268,33 @@ export default function ReviewsManager() {
                                     </div>
 
                                     {/* Text */}
-                                    <p className="text-gray-300 mb-3">"{review.text}"</p>
+                                    <p className="text-gray-300 mb-3 whitespace-pre-wrap">{review.text}</p>
 
                                     {/* Author & Date */}
-                                    <div className="text-sm text-gray-500">
+                                    <div className="text-sm text-gray-500 flex items-center gap-2">
                                         <span className="font-semibold text-gray-400">{review.author}</span>
-                                        {' • '}
+                                        <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
                                         <span>{new Date(review.date).toLocaleDateString('cs-CZ')}</span>
                                     </div>
                                 </div>
 
-                                {/* Delete Button */}
-                                <button
-                                    onClick={() => handleDeleteReview(review.id)}
-                                    className="text-red-400 hover:text-red-300 p-2 hover:bg-red-900/20 rounded-lg transition-colors"
-                                    title="Smazat recenzi"
-                                >
-                                    <Trash2 size={20} />
-                                </button>
+                                {/* Actions */}
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <button
+                                        onClick={() => handleEditClick(review)}
+                                        className="text-blue-400 hover:text-blue-300 p-2 hover:bg-blue-900/20 rounded-lg transition-colors"
+                                        title="Upravit recenzi"
+                                    >
+                                        <Edit size={20} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteReview(review.id)}
+                                        className="text-red-400 hover:text-red-300 p-2 hover:bg-red-900/20 rounded-lg transition-colors"
+                                        title="Smazat recenzi"
+                                    >
+                                        <Trash2 size={20} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))

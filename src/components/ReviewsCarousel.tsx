@@ -173,7 +173,7 @@ export default function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
 
                                         {/* Review Text */}
                                         <p className="text-gray-300 text-sm mb-3 flex-1 line-clamp-2">
-                                            "{review.text}"
+                                            {review.text}
                                         </p>
 
                                         {/* Author & Date */}
