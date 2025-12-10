@@ -6,16 +6,26 @@ import { toast } from 'sonner';
 import { db, storage } from '@/lib/firebase';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Skin, SkinSticker } from '@/types/skin';
+import { Skin, SkinSticker, SkinUtils } from '@/types/skin';
 import { POPULAR_STICKERS, searchStickers, StickerData } from '@/data/stickers';
 
 // Mapování opotřebení
 const WEAR_OPTIONS = [
   { value: 'Factory New', internal: 'WearCategory0', label: 'Factory New (Zbrusu nový)' },
-  { value: 'Minimal Wear', internal: 'WearCategory1', label: 'Minimal Wear (Téměř bez známek)' },
+  { value: 'Minimal Wear', internal: 'WearCategory1', label: 'Minimal Wear (Lehce opotřebený)' },
   { value: 'Field-Tested', internal: 'WearCategory2', label: 'Field-Tested (Opotřebený)' },
-  { value: 'Well-Worn', internal: 'WearCategory3', label: 'Well-Worn (Hodně opotřebený)' },
+  { value: 'Well-Worn', internal: 'WearCategory3', label: 'Well-Worn (Silně opotřebený)' },
   { value: 'Battle-Scarred', internal: 'WearCategory4', label: 'Battle-Scarred (Poničený bojem)' },
+];
+
+const RARITY_OPTIONS = [
+  { value: 'Consumer', label: 'Consumer Grade (Běžná)', color: 'b0c3d9' },
+  { value: 'Industrial', label: 'Industrial Grade (Průmyslová)', color: '5e98d9' },
+  { value: 'Mil-Spec', label: 'Mil-Spec (Vojenská)', color: '4b69ff' },
+  { value: 'Restricted', label: 'Restricted (Zakázaná)', color: '8847ff' },
+  { value: 'Classified', label: 'Classified (Důvěrná)', color: 'd32ce6' },
+  { value: 'Covert', label: 'Covert (Tajná)', color: 'eb4b4b' },
+  { value: 'Contraband', label: 'Contraband (Pašovaná)', color: 'e4ae39' },
 ];
 
 // Kategorie zbraní
@@ -62,6 +72,7 @@ export default function ManualListing() {
   const [price, setPrice] = useState('');
   const [isStatTrak, setIsStatTrak] = useState(false);
   const [category, setCategory] = useState('rifle');
+  const [rarity, setRarity] = useState('Classified');
   const [inspectLink, setInspectLink] = useState('');
   const [stickers, setStickers] = useState<StickerInput[]>([]);
   const [customImage, setCustomImage] = useState<File | null>(null);
@@ -336,8 +347,8 @@ export default function ManualListing() {
         // Vizuální
         imageUrl: '',
         iconUrl: '',
-        nameColor: 'd32ce6',
-        rarityColor: 'd32ce6',
+        nameColor: RARITY_OPTIONS.find(r => r.value === rarity)?.color || 'd32ce6',
+        rarityColor: RARITY_OPTIONS.find(r => r.value === rarity)?.color || 'd32ce6',
         customScreenshotUrl: customScreenshotUrl,
         detailImageUrl: detailImageUrl,
 
@@ -351,7 +362,7 @@ export default function ManualListing() {
         // Kategorizace
         weaponType: weaponType.trim(),
         category: category, // Uživatelem vybraná kategorie
-        rarity: 'Classified',
+        rarity: rarity,
 
         // Stickery
         stickers: skinStickers.length > 0 ? skinStickers : undefined,
@@ -392,6 +403,7 @@ export default function ManualListing() {
       setPrice('');
       setIsStatTrak(false);
       setCategory('rifle');
+      setRarity('Classified');
       setInspectLink('');
       setStickers([]);
       setCustomImage(null);
@@ -516,6 +528,25 @@ export default function ManualListing() {
                   >
                     {CATEGORY_OPTIONS.map(option => (
                       <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Rarita */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Rarita (Vzácnost) *
+                  </label>
+                  <select
+                    value={rarity}
+                    onChange={(e) => setRarity(e.target.value)}
+                    className="w-full px-4 py-2 bg-[#0f1117] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    required
+                  >
+                    {RARITY_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value} style={{ color: `#${option.color}` }}>
                         {option.label}
                       </option>
                     ))}

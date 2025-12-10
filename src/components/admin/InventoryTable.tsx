@@ -13,9 +13,9 @@ import { POPULAR_STICKERS, searchStickers, StickerData } from '@/data/stickers';
 // Mapování opotřebení
 const WEAR_OPTIONS = [
     { value: 'Factory New', internal: 'WearCategory0', label: 'Factory New (Zbrusu nový)' },
-    { value: 'Minimal Wear', internal: 'WearCategory1', label: 'Minimal Wear (Téměř bez známek)' },
+    { value: 'Minimal Wear', internal: 'WearCategory1', label: 'Minimal Wear (Lehce opotřebený)' },
     { value: 'Field-Tested', internal: 'WearCategory2', label: 'Field-Tested (Opotřebený)' },
-    { value: 'Well-Worn', internal: 'WearCategory3', label: 'Well-Worn (Hodně opotřebený)' },
+    { value: 'Well-Worn', internal: 'WearCategory3', label: 'Well-Worn (Silně opotřebený)' },
     { value: 'Battle-Scarred', internal: 'WearCategory4', label: 'Battle-Scarred (Poničený bojem)' },
 ];
 
@@ -42,6 +42,7 @@ export default function InventoryTable() {
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
     const [editingSkin, setEditingSkin] = useState<Skin | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [sortOption, setSortOption] = useState<'updatedAt' | 'name'>('updatedAt');
 
     // Edit form localized state for split name
     const [editWeaponType, setEditWeaponType] = useState('');
@@ -327,7 +328,7 @@ export default function InventoryTable() {
             const updateData: any = {
                 name: finalName,
                 weaponType: editWeaponType.trim(),
-                updatedAt: Timestamp.now(), // Aktualizujeme čas poslední úpravy
+                // updatedAt: Timestamp.now(), // Zakomentováno, aby se neměnilo pořadí při editaci
             };
 
             // Přidáme základní hodnoty
@@ -692,7 +693,10 @@ export default function InventoryTable() {
     };
 
     const filteredSkins = skins.filter(skin => {
-        const matchesSearch = skin.name.toLowerCase().includes(filter.toLowerCase());
+        // Loose search: check if all search terms are present in the name
+        const searchTerms = filter.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+        const nameLower = skin.name.toLowerCase();
+        const matchesSearch = searchTerms.every(term => nameLower.includes(term));
 
         // Určení kategorie (priorita: manuálně nastavená -> steam kategorie -> podle názvu)
         let skinCategory = '';
@@ -715,6 +719,12 @@ export default function InventoryTable() {
         const matchesCategory = selectedCategory === 'all' || skinCategory === selectedCategory;
         return matchesSearch && matchesCategory;
     }).sort((a, b) => {
+        // Sort based on selected option
+        if (sortOption === 'name') {
+            return a.name.localeCompare(b.name);
+        }
+
+        // Default sort (updatedAt) + hidden logic
         // Sort hidden items to the bottom
         if (a.isVisible === b.isVisible) return 0;
         return a.isVisible ? -1 : 1;
@@ -758,6 +768,25 @@ export default function InventoryTable() {
                             </option>
                         ))}
                     </select>
+
+                    {/* Local Sort */}
+                    <div className="flex items-center gap-2 border-l pl-4 border-gray-200">
+                        <span className="text-sm text-gray-500">Řadit:</span>
+                        <button
+                            onClick={() => setSortOption('updatedAt')}
+                            className={`p-2 rounded-lg transition-colors ${sortOption === 'updatedAt' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 text-gray-500'}`}
+                            title="Výchozí řazení"
+                        >
+                            <RefreshCw size={18} />
+                        </button>
+                        <button
+                            onClick={() => setSortOption('name')}
+                            className={`p-2 rounded-lg transition-colors ${sortOption === 'name' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 text-gray-500'}`}
+                            title="Podle názvu"
+                        >
+                            <ListOrdered size={18} />
+                        </button>
+                    </div>
 
                     {/* CSFloat Stats */}
                     <div className="flex items-center gap-3 text-sm">

@@ -100,14 +100,22 @@ export default function SkinCard({ skin }: SkinProps) {
                         );
                     })()}
 
-                    <div className="flex gap-4 text-xs text-white opacity-90">
+
+                    <div className="flex gap-4 text-xs text-white opacity-90 mb-3">
                         {skin.floatValue !== undefined && (
-                            <span>Float: {SkinUtils.formatFloat(skin.floatValue)}</span>
+                            <span>Float: {(() => {
+                                // Truncate to 4 decimal places without rounding
+                                const str = skin.floatValue.toString();
+                                const decimalIndex = str.indexOf('.');
+                                return decimalIndex === -1 ? str : str.substring(0, decimalIndex + 5);
+                            })()}</span>
                         )}
                         {skin.paintSeed !== undefined && (
                             <span>Pattern: {skin.paintSeed}</span>
                         )}
                     </div>
+
+
 
                 </div>
 

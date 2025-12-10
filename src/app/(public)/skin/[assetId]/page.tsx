@@ -178,25 +178,27 @@ export default function SkinDetailPage() {
                                 <span className="text-lg font-medium text-white">Cena</span>
                             </div>
                             <div className="flex items-center justify-center gap-4 mb-2">
-                                <div className="text-2xl font-bold text-center">
-                                    {skin.price ? (
-                                        (() => {
-                                            if (currency === 'CZK') {
-                                                return new Intl.NumberFormat('cs-CZ', {
-                                                    style: 'currency',
-                                                    currency: 'CZK',
-                                                    maximumFractionDigits: 0
-                                                }).format(skin.price);
-                                            } else {
-                                                const priceEur = skin.price / exchangeRate;
-                                                return new Intl.NumberFormat('de-DE', {
-                                                    style: 'currency',
-                                                    currency: 'EUR',
-                                                    maximumFractionDigits: 2
-                                                }).format(priceEur);
-                                            }
-                                        })()
-                                    ) : 'na dotaz'}
+                                <div className="bg-[#161616] border border-gray-600 px-6 py-2 rounded-xl shadow-lg">
+                                    <div className="text-3xl font-bold text-center text-white tracking-wide">
+                                        {skin.price ? (
+                                            (() => {
+                                                if (currency === 'CZK') {
+                                                    return new Intl.NumberFormat('cs-CZ', {
+                                                        style: 'currency',
+                                                        currency: 'CZK',
+                                                        maximumFractionDigits: 0
+                                                    }).format(skin.price);
+                                                } else {
+                                                    const priceEur = skin.price / exchangeRate;
+                                                    return new Intl.NumberFormat('de-DE', {
+                                                        style: 'currency',
+                                                        currency: 'EUR',
+                                                        maximumFractionDigits: 2
+                                                    }).format(priceEur);
+                                                }
+                                            })()
+                                        ) : 'na dotaz'}
+                                    </div>
                                 </div>
 
                                 {skin.price && (

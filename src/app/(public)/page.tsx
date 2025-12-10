@@ -8,6 +8,8 @@ import ReviewsCarousel from '@/components/ReviewsCarousel';
 import { Search, Facebook, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { Skin } from '@/types/skin';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 interface Review {
     id: string;
@@ -46,14 +48,38 @@ const CATEGORIES = [
 
 type SortOption = 'newest' | 'tradable' | 'alphabetical';
 
-export default function HomePage() {
+function HomeContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
     const [skins, setSkins] = useState<Skin[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [sortBy, setSortBy] = useState<SortOption>('newest');
+
+    // Initialize state from URL params
+    const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
+    const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'all');
+    const [sortBy, setSortBy] = useState<SortOption>(() => (searchParams.get('sort') as SortOption) || 'newest');
+
     const [heroText, setHeroText] = useState<HeroText>(DEFAULT_HERO_TEXT);
+
+    // Sync state to URL
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (searchQuery) params.set('q', searchQuery);
+        if (selectedCategory !== 'all') params.set('category', selectedCategory);
+        if (sortBy !== 'newest') params.set('sort', sortBy);
+
+        const newSearch = params.toString();
+        const currentSearch = searchParams.toString();
+
+        if (newSearch !== currentSearch) {
+            // Using replace to update URL without adding new history entries for every keystroke
+            // But if we want back button to work for filter changes, we might want push.
+            // However, for "navigating back from product", replace is sufficient as long as the URL is correct.
+            router.replace(`/?${newSearch}`, { scroll: false });
+        }
+    }, [searchQuery, selectedCategory, sortBy, router, searchParams]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -436,5 +462,13 @@ export default function HomePage() {
                 </footer>
             </div>
         </div>
+    );
+}
+
+export default function HomePage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <HomeContent />
+        </Suspense>
     );
 }
