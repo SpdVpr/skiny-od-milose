@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, updateDoc, setDoc, query, orderBy, writeBatch, deleteDoc, Timestamp } from 'firebase/firestore';
-import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2, Copy, Plus } from 'lucide-react';
+import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2, Copy, Plus, ListOrdered, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skin, SkinUtils, SkinSticker } from '@/types/skin';
 import SkinStats from '@/components/SkinStats';
@@ -99,6 +99,26 @@ export default function InventoryTable() {
             toast.success(`Price updated for ${skin.name}`);
         } catch (error) {
             toast.error("Failed to update price");
+        }
+    };
+
+    const handleOrderChange = (assetId: string, newOrder: string) => {
+        const order = parseInt(newOrder);
+        if (isNaN(order) && newOrder !== '') return;
+
+        setSkins(prev => prev.map(skin =>
+            skin.assetId === assetId ? { ...skin, orderIndex: newOrder === '' ? undefined : order } : skin
+        ));
+    };
+
+    const saveOrder = async (skin: Skin) => {
+        try {
+            await updateDoc(doc(db, 'skins', skin.assetId), {
+                orderIndex: skin.orderIndex === undefined ? null : skin.orderIndex
+            });
+            toast.success(`Pořadí uloženo pro ${skin.name}`);
+        } catch (error) {
+            toast.error("Chyba při ukládání pořadí");
         }
     };
 
@@ -519,6 +539,100 @@ export default function InventoryTable() {
         }
     };
 
+    const assignSequentialOrder = async () => {
+        // Assigns 1, 2, 3... to selected items based on current visual sort
+        if (selectedSkins.size === 0) {
+            toast.error('Nevybrali jste žádné skiny');
+            return;
+        }
+
+        if (!confirm(`Opravdu chcete nastavit pořadí 1..${selectedSkins.size} pro vybrané skiny? Tímto přepíšete existující hodnoty.`)) {
+            return;
+        }
+
+        setIsBulkUpdating(true);
+        try {
+            const batch = writeBatch(db);
+
+            // Get selected skins in current filtered order
+            const selectedOrderedSkins = filteredSkins.filter(s => selectedSkins.has(s.assetId));
+
+            selectedOrderedSkins.forEach((skin, index) => {
+                const skinRef = doc(db, 'skins', skin.assetId);
+                const newOrder = index + 1;
+                batch.update(skinRef, { orderIndex: newOrder });
+            });
+
+            await batch.commit();
+
+            setSkins(prev => {
+                const updatedSkins = [...prev];
+                selectedOrderedSkins.forEach((skin, index) => {
+                    const foundIndex = updatedSkins.findIndex(s => s.assetId === skin.assetId);
+                    if (foundIndex !== -1) {
+                        updatedSkins[foundIndex] = { ...updatedSkins[foundIndex], orderIndex: index + 1 };
+                    }
+                });
+                return updatedSkins;
+            });
+
+            toast.success(`Pořadí 1-${selectedSkins.size} bylo nastaveno`);
+            // setSelectedSkins(new Set()); // Keep selection for potential reverse
+        } catch (error) {
+            console.error('Sequence assign error:', error);
+            toast.error('Chyba při nastavování pořadí');
+        } finally {
+            setIsBulkUpdating(false);
+        }
+    };
+
+    const reverseOrderIndices = async () => {
+        if (selectedSkins.size === 0) {
+            toast.error('Nevybrali jste žádné skiny');
+            return;
+        }
+
+        const selectedSkinsArray = filteredSkins.filter(s => selectedSkins.has(s.assetId) && typeof s.orderIndex === 'number');
+
+        if (selectedSkinsArray.length < 2) {
+            toast.error('Potřebujete alespoň 2 skiny s nastaveným pořadím pro otočení');
+            return;
+        }
+
+        // Calculate min and max
+        const indices = selectedSkinsArray.map(s => s.orderIndex as number);
+        const minIndex = Math.min(...indices);
+        const maxIndex = Math.max(...indices);
+
+        setIsBulkUpdating(true);
+        try {
+            const batch = writeBatch(db);
+
+            selectedSkinsArray.forEach(skin => {
+                const skinRef = doc(db, 'skins', skin.assetId);
+                const currentOrder = skin.orderIndex as number;
+                const newOrder = maxIndex + minIndex - currentOrder;
+                batch.update(skinRef, { orderIndex: newOrder });
+            });
+
+            await batch.commit();
+
+            setSkins(prev => prev.map(skin => {
+                if (selectedSkins.has(skin.assetId) && typeof skin.orderIndex === 'number') {
+                    return { ...skin, orderIndex: maxIndex + minIndex - skin.orderIndex };
+                }
+                return skin;
+            }));
+
+            toast.success(`Pořadí otočeno pro ${selectedSkinsArray.length} skinů`);
+        } catch (error) {
+            console.error('Reverse order error:', error);
+            toast.error('Chyba při otáčení pořadí');
+        } finally {
+            setIsBulkUpdating(false);
+        }
+    };
+
     // Mapování Steam kategorií na naše kategorie (zkopírováno z page.tsx pro konzistenci)
     const mapSteamCategory = (steamCategory: string): string => {
         const lower = steamCategory.toLowerCase();
@@ -731,6 +845,28 @@ export default function InventoryTable() {
                             Zrušit výběr
                         </button>
                     )}
+
+                    <div className="h-8 w-px bg-gray-300 mx-2" />
+
+                    <button
+                        onClick={assignSequentialOrder}
+                        disabled={isBulkUpdating || selectedSkins.size === 0}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 text-sm"
+                        title="Přiřadí vybraným skinům pořadí 1, 2, 3... dle aktuálního zobrazení"
+                    >
+                        <ListOrdered size={16} />
+                        Nastavit pořadí 1..N
+                    </button>
+
+                    <button
+                        onClick={reverseOrderIndices}
+                        disabled={isBulkUpdating || selectedSkins.size === 0}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 text-sm"
+                        title="Otočí hodnoty pořadí vybraných skinů (např. 1->300, 300->1)"
+                    >
+                        <RefreshCw size={16} />
+                        Otočit čísla
+                    </button>
                 </div>
             </div>
 
@@ -754,6 +890,7 @@ export default function InventoryTable() {
                             <th className="p-4">Item</th>
                             <th className="p-4">Wear / Float</th>
                             <th className="p-4">Rarity</th>
+                            <th className="p-4">Pořadí</th>
                             <th className="p-4">Price (Kč)</th>
                             <th className="p-4">Status</th>
                             <th className="p-4">Actions</th>
@@ -837,13 +974,26 @@ export default function InventoryTable() {
                                             </span>
                                         )}
                                     </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                value={skin.orderIndex === undefined || skin.orderIndex === null ? '' : skin.orderIndex}
+                                                onChange={(e) => handleOrderChange(skin.assetId, e.target.value)}
+                                                onBlur={() => saveOrder(skin)}
+                                                className="w-16 px-2 py-1 border rounded text-right text-gray-900"
+                                                placeholder="-"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </div>
+                                    </td>
                                     <td className="p-4" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="number"
                                                 value={skin.price || ''}
                                                 onChange={(e) => handlePriceChange(skin.assetId, e.target.value)}
-                                                className="w-24 px-2 py-1 border rounded"
+                                                className="w-24 px-2 py-1 border rounded text-gray-900"
                                                 placeholder="0"
                                             />
                                             <button

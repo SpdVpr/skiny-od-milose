@@ -195,20 +195,39 @@ export default function HomePage() {
 
         return matchesSearch && matchesCategory;
     }).sort((a, b) => {
+        // 1. Sort hidden items to the bottom
+        if (a.isVisible !== b.isVisible) {
+            return a.isVisible ? -1 : 1;
+        }
+
         const compareDates = (skinA: Skin, skinB: Skin) => {
             // Seconds comparison
             const secondsDiff = (skinB.updatedAt?.seconds || 0) - (skinA.updatedAt?.seconds || 0);
             if (secondsDiff !== 0) return secondsDiff;
 
-            // Nanoseconds comparison (for more precision)
-            const nanoDiff = (skinB.updatedAt?.nanoseconds || 0) - (skinA.updatedAt?.nanoseconds || 0);
-            if (nanoDiff !== 0) return nanoDiff;
-
-            // Fallback: Reverse ID order (useful for bulk imports with same timestamp)
-            return skinB.assetId.localeCompare(skinA.assetId);
+            // Fallback: Normal ID order (A-Z)
+            return skinA.assetId.localeCompare(skinB.assetId);
         };
 
         if (sortBy === 'newest') {
+            // Logic: Items WITHOUT orderIndex come FIRST (sorted by date)
+            // Items WITH orderIndex come LAST (sorted by index ASC)
+
+            const aHasOrder = typeof a.orderIndex === 'number';
+            const bHasOrder = typeof b.orderIndex === 'number';
+
+            // Both have order -> Sort by index ASC
+            if (aHasOrder && bHasOrder) {
+                return (a.orderIndex || 0) - (b.orderIndex || 0);
+            }
+
+            // Only A has order -> A goes to bottom (1)
+            if (aHasOrder) return 1;
+
+            // Only B has order -> B goes to bottom (-1 means A comes first)
+            if (bHasOrder) return -1;
+
+            // Neither has order -> Sort by date
             return compareDates(a, b);
         }
         if (sortBy === 'tradable') {

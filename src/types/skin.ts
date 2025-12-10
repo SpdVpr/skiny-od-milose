@@ -90,6 +90,7 @@ export interface Skin {
   isVisible: boolean;
   inInventory: boolean;
   updatedAt: Timestamp;
+  orderIndex?: number; // Pořadí pro manuální řazení (pokud není vyplněno, řadí se podle data)
 }
 
 /**
