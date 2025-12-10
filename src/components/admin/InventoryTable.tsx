@@ -19,6 +19,16 @@ const WEAR_OPTIONS = [
     { value: 'Battle-Scarred', internal: 'WearCategory4', label: 'Battle-Scarred (Poničený bojem)' },
 ];
 
+const RARITY_OPTIONS = [
+    { value: 'Consumer Grade', label: 'Consumer Grade (Běžná)', color: 'b0c3d9' },
+    { value: 'Industrial Grade', label: 'Industrial Grade (Průmyslová)', color: '5e98d9' },
+    { value: 'Mil-Spec Grade', label: 'Mil-Spec Grade (Vojenská)', color: '4b69ff' },
+    { value: 'Restricted', label: 'Restricted (Zakázaná)', color: '8847ff' },
+    { value: 'Classified', label: 'Classified (Důvěrná)', color: 'd32ce6' },
+    { value: 'Covert', label: 'Covert (Tajná)', color: 'eb4b4b' },
+    { value: 'Contraband', label: 'Contraband (Pašovaná)', color: 'e4ae39' },
+];
+
 // Kategorie zbraní
 const CATEGORIES = [
     { id: 'all', name: 'Vše' },
@@ -48,6 +58,7 @@ export default function InventoryTable() {
     const [editWeaponType, setEditWeaponType] = useState('');
     const [editSkinName, setEditSkinName] = useState('');
     const [editIsStatTrak, setEditIsStatTrak] = useState(false);
+    const [editRarity, setEditRarity] = useState('Classified');
 
     // Sticker management state
     const [stickerSearchQuery, setStickerSearchQuery] = useState<string[]>([]);
@@ -225,8 +236,12 @@ export default function InventoryTable() {
         setEditingSkin({ ...skin });
 
         // Detect StatTrak
+        // Detect StatTrak
         const isStatTrak = skin.name.includes('StatTrak™');
         setEditIsStatTrak(isStatTrak);
+
+        // Detect Rarity
+        setEditRarity(skin.rarity || 'Classified');
 
         // Clean name for splitting (remove StatTrak prefix and trim)
         let cleanName = skin.name.replace('StatTrak™', '').trim();
@@ -365,6 +380,12 @@ export default function InventoryTable() {
             if (editingSkin.tradable !== undefined) updateData.tradable = editingSkin.tradable;
             if (editingSkin.marketable !== undefined) updateData.marketable = editingSkin.marketable;
             if (editingSkin.tradeRestrictionDate) updateData.tradeRestrictionDate = editingSkin.tradeRestrictionDate;
+
+            if (editingSkin.tradeRestrictionDate) updateData.tradeRestrictionDate = editingSkin.tradeRestrictionDate;
+
+            // Rarity
+            updateData.rarity = editRarity;
+            updateData.rarityColor = RARITY_OPTIONS.find(r => r.value === editRarity)?.color || 'd32ce6';
 
             await updateDoc(doc(db, 'skins', editingSkin.assetId), updateData);
 
@@ -1204,6 +1225,24 @@ export default function InventoryTable() {
                                     {CATEGORIES.filter(c => c.id !== 'all').map(category => (
                                         <option key={category.id} value={category.id}>
                                             {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Rarita */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Rarita (Vzácnost)
+                                </label>
+                                <select
+                                    value={editRarity}
+                                    onChange={(e) => setEditRarity(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                                >
+                                    {RARITY_OPTIONS.map(option => (
+                                        <option key={option.value} value={option.value} style={{ color: `#${option.color}` }}>
+                                            {option.label}
                                         </option>
                                     ))}
                                 </select>

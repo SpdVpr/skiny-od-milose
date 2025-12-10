@@ -269,7 +269,10 @@ export const SkinUtils = {
    */
   formatFloat(floatValue?: number): string {
     if (!floatValue) return 'N/A';
-    return floatValue.toFixed(4);
+    // Truncate to 4 decimal places without rounding
+    const floatStr = floatValue.toString();
+    const decimalIndex = floatStr.indexOf('.');
+    return decimalIndex === -1 ? floatStr : floatStr.slice(0, decimalIndex + 5);
   },
 
   /**
@@ -311,9 +314,9 @@ export const SkinUtils = {
 
     const translations: Record<string, string> = {
       'Factory New': 'Zbrusu nový',
-      'Minimal Wear': 'Téměř bez známek',
+      'Minimal Wear': 'Lehce opotřebený',
       'Field-Tested': 'Opotřebený',
-      'Well-Worn': 'Hodně opotřebený',
+      'Well-Worn': 'Silně opotřebený',
       'Battle-Scarred': 'Poničený bojem',
     };
 

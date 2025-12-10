@@ -19,9 +19,9 @@ const WEAR_OPTIONS = [
 ];
 
 const RARITY_OPTIONS = [
-  { value: 'Consumer', label: 'Consumer Grade (Běžná)', color: 'b0c3d9' },
-  { value: 'Industrial', label: 'Industrial Grade (Průmyslová)', color: '5e98d9' },
-  { value: 'Mil-Spec', label: 'Mil-Spec (Vojenská)', color: '4b69ff' },
+  { value: 'Consumer Grade', label: 'Consumer Grade (Běžná)', color: 'b0c3d9' },
+  { value: 'Industrial Grade', label: 'Industrial Grade (Průmyslová)', color: '5e98d9' },
+  { value: 'Mil-Spec Grade', label: 'Mil-Spec Grade (Vojenská)', color: '4b69ff' },
   { value: 'Restricted', label: 'Restricted (Zakázaná)', color: '8847ff' },
   { value: 'Classified', label: 'Classified (Důvěrná)', color: 'd32ce6' },
   { value: 'Covert', label: 'Covert (Tajná)', color: 'eb4b4b' },
