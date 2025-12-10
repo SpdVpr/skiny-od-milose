@@ -68,12 +68,12 @@ export default function CurrencySettings() {
 
             <div className="flex gap-2 items-end">
                 <div className="flex-1">
-                    <label className="text-xs text-gray-500 block mb-1">Kurz EUR (Kč/€)</label>
+                    <label className="text-sm text-gray-900 block mb-1">Kurz EUR (Kč/€)</label>
                     <input
                         type="number"
                         value={rate}
                         onChange={(e) => setRate(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
                         placeholder="25.0"
                         step="0.1"
                     />

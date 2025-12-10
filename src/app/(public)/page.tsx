@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, doc, getDoc } from 'firebase/firestore';
 import SkinCard from '@/components/SkinCard';
 import ReviewsCarousel from '@/components/ReviewsCarousel';
 import { Search, Facebook, ChevronDown } from 'lucide-react';
@@ -16,6 +16,20 @@ interface Review {
     text: string;
     date: string;
 }
+
+interface HeroText {
+    headline: string;
+    line1: string;
+    line2: string;
+    line3: string;
+}
+
+const DEFAULT_HERO_TEXT: HeroText = {
+    headline: 'Výkup, prodej i skiny na objednávku – vše na jednom místě.',
+    line1: 'Bezpečnost, rychlost a spolehlivost.',
+    line2: 'Tisíce uzavřených obchodů a stovky spokojených zákazníků.',
+    line3: 'S Vámi od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.'
+};
 
 // Kategorie zbraní
 const CATEGORIES = [
@@ -39,6 +53,7 @@ export default function HomePage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [sortBy, setSortBy] = useState<SortOption>('newest');
+    const [heroText, setHeroText] = useState<HeroText>(DEFAULT_HERO_TEXT);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,6 +82,12 @@ export default function HomePage() {
                 })) as Review[];
                 console.log('✅ [FRONT PAGE] Loaded reviews:', reviewsData.length);
                 setReviews(reviewsData);
+
+                // Fetch hero settings
+                const heroDoc = await getDoc(doc(db, 'settings', 'hero'));
+                if (heroDoc.exists()) {
+                    setHeroText({ ...DEFAULT_HERO_TEXT, ...heroDoc.data() as HeroText });
+                }
             } catch (error) {
                 console.error("❌ [FRONT PAGE] Error fetching data:", error);
             } finally {
@@ -174,13 +195,26 @@ export default function HomePage() {
 
         return matchesSearch && matchesCategory;
     }).sort((a, b) => {
+        const compareDates = (skinA: Skin, skinB: Skin) => {
+            // Seconds comparison
+            const secondsDiff = (skinB.updatedAt?.seconds || 0) - (skinA.updatedAt?.seconds || 0);
+            if (secondsDiff !== 0) return secondsDiff;
+
+            // Nanoseconds comparison (for more precision)
+            const nanoDiff = (skinB.updatedAt?.nanoseconds || 0) - (skinA.updatedAt?.nanoseconds || 0);
+            if (nanoDiff !== 0) return nanoDiff;
+
+            // Fallback: Reverse ID order (useful for bulk imports with same timestamp)
+            return skinB.assetId.localeCompare(skinA.assetId);
+        };
+
         if (sortBy === 'newest') {
-            return (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0);
+            return compareDates(a, b);
         }
         if (sortBy === 'tradable') {
             // Tradable first
             if (a.tradable === b.tradable) {
-                return (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0); // Then by date
+                return compareDates(a, b);
             }
             return (a.tradable ? -1 : 1);
         }
@@ -236,17 +270,17 @@ export default function HomePage() {
                         <div className="bg-[#161616]/20 rounded-3xl p-6 lg:p-8 border border-[#161616]/20 shadow-2xl backdrop-blur-sm">
                             <div className="text-center max-w-5xl mx-auto">
                                 <h2 className="text-xl lg:text-2xl font-bold text-white mb-3">
-                                    Výkup, prodej i skiny na objednávku – vše na jednom místě.
+                                    {heroText.headline}
                                 </h2>
                                 <div className="space-y-2 mb-6">
                                     <p className="text-base text-gray-300">
-                                        Bezpečnost, rychlost a spolehlivost.
+                                        {heroText.line1}
                                     </p>
                                     <p className="text-base text-gray-300">
-                                        Tisíce uzavřených obchodů a stovky spokojených zákazníků.
+                                        {heroText.line2}
                                     </p>
                                     <p className="text-base text-gray-300">
-                                        S Vámi od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.<br />
+                                        {heroText.line3}<br />
                                     </p>
                                 </div>
                                 <div className="flex flex-col items-center gap-4 mt-6">

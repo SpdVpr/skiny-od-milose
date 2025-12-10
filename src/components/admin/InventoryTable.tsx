@@ -600,6 +600,10 @@ export default function InventoryTable() {
 
         const matchesCategory = selectedCategory === 'all' || skinCategory === selectedCategory;
         return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+        // Sort hidden items to the bottom
+        if (a.isVisible === b.isVisible) return 0;
+        return a.isVisible ? -1 : 1;
     });
 
     const csFloatStats = {
