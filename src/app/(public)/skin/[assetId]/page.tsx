@@ -132,7 +132,7 @@ export default function SkinDetailPage() {
                             2. Jinak: Custom Screenshot OR Steam Image
                         */}
                         <div
-                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start h-[50vh] lg:h-auto lg:max-h-[900px] cursor-pointer"
+                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start h-[50vh] lg:h-auto lg:max-h-[1000px] cursor-pointer"
                             onClick={() => setIsImageModalOpen(true)}
                         >
                             {skin.detailImageUrl ? (
