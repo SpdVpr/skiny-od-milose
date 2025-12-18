@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Skiny od Miloše - CS:GO Skins",
+  title: "Skiny od Miloše - CS:GO Skiny",
   description: "Kvalitní CS:GO skiny za férové ceny. Rychlé jednání, ověřené float hodnoty.",
   icons: {
     icon: [
