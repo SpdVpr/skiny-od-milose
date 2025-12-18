@@ -103,14 +103,31 @@ src/
 Create a `.env.local` file:
 
 ```env
+# Firebase
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+# Steam
 STEAM_ID=your_steam_id
+
+# Google Analytics
+NEXT_PUBLIC_GA_MEASUREMENT_ID=your_measurement_id
+NEXT_PUBLIC_GA_TAG_ID=your_tag_id
+
+# Admin
+ADMIN_PASSWORD=your_admin_password
 ```
+
+## 📊 Google Analytics
+
+Google Analytics is integrated for tracking user behavior and site performance.
+
+- 📚 [Google Analytics Documentation](GOOGLE_ANALYTICS.md)
+- 📈 [Analytics Dashboard](https://analytics.google.com/)
 
 ## 📄 License
 
