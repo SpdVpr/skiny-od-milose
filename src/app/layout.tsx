@@ -15,8 +15,49 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Skiny od Miloše - CS:GO Skiny",
-  description: "Kvalitní CS:GO skiny za férové ceny. Rychlé jednání, ověřené float hodnoty.",
+  title: "Skiny od Miloše CS2 Skiny",
+  description: "Výkup, prodej i skiny na objednávku – vše na jednom místě. Bezpečnost, rychlost a spolehlivost. Tisíce uzavřených obchodů a stovky spokojených zákazníků. S Vámi od roku 2023 jako ověřený partner na cestě k vašemu vysněnému skinu do hry Counter Strike 2.",
+  keywords: ["CS2 skiny", "Counter Strike 2", "CS:GO skiny", "nože CS2", "rukavice CS2", "výkup skinů", "prodej skinů", "skiny na objednávku"],
+  authors: [{ name: "Skiny od Miloše" }],
+  creator: "Skiny od Miloše",
+  publisher: "Skiny od Miloše",
+  metadataBase: new URL('https://www.skinyodmilose.cz'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'cs_CZ',
+    url: 'https://www.skinyodmilose.cz',
+    siteName: 'Skiny od Miloše',
+    title: 'Skiny od Miloše CS2 Skiny',
+    description: 'Výkup, prodej i skiny na objednávku – vše na jednom místě. Bezpečnost, rychlost a spolehlivost. Tisíce uzavřených obchodů a stovky spokojených zákazníků.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Skiny od Miloše - CS2 Skiny',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Skiny od Miloše CS2 Skiny',
+    description: 'Výkup, prodej i skiny na objednávku – vše na jednom místě. Bezpečnost, rychlost a spolehlivost.',
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },

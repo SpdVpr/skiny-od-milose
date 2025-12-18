@@ -129,6 +129,14 @@ Google Analytics is integrated for tracking user behavior and site performance.
 - 📚 [Google Analytics Documentation](GOOGLE_ANALYTICS.md)
 - 📈 [Analytics Dashboard](https://analytics.google.com/)
 
+## 📱 Social Media Sharing
+
+Open Graph and Twitter Card meta tags are configured for optimal social media sharing.
+
+- 📚 [Social Sharing Documentation](SOCIAL_SHARING.md)
+- 🧪 [Facebook Debugger](https://developers.facebook.com/tools/debug/)
+- 🐦 [Twitter Card Validator](https://cards-dev.twitter.com/validator)
+
 ## 📄 License
 
 MIT
