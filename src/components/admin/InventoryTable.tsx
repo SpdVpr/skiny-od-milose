@@ -445,9 +445,11 @@ export default function InventoryTable() {
     const copySkin = async (skin: Skin) => {
         try {
             // Vytvoříme nové unikátní ID pro kopii
+            // Vytvoříme nové unikátní ID pro kopii (pouze číselné, aby vypadalo jako reálné assetId)
+            // Použijeme timestamp + náhodné číslo
             const timestamp = Date.now();
-            const randomStr = Math.random().toString(36).substring(2, 10);
-            const newAssetId = `copy_${timestamp}_${randomStr}`;
+            const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            const newAssetId = `${timestamp}${randomSuffix}`;
 
             // Vytvoříme kopii skinu s novým ID a nastavíme jako neviditelný
             const skinCopy: Partial<Skin> = {
