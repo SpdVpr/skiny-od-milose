@@ -71,6 +71,7 @@ export default function ManualListing() {
   const [floatValue, setFloatValue] = useState('');
   const [price, setPrice] = useState('');
   const [isStatTrak, setIsStatTrak] = useState(false);
+  const [isSouvenir, setIsSouvenir] = useState(false);
   const [category, setCategory] = useState('rifle');
   const [rarity, setRarity] = useState('Classified');
   const [inspectLink, setInspectLink] = useState('');
@@ -267,7 +268,10 @@ export default function ManualListing() {
       toast.loading('Vytvářím produkt...');
 
       // Vytvoříme market hash name
-      const prefix = isStatTrak ? 'StatTrak™ ' : '';
+      let prefix = '';
+      if (isStatTrak) prefix = 'StatTrak™ ';
+      if (isSouvenir) prefix = 'Souvenir ';
+
       const fullName = `${weaponType.trim()} | ${skinName.trim()}`;
       const marketHashName = `${prefix}${fullName} (${wear})`;
 
@@ -402,6 +406,7 @@ export default function ManualListing() {
       setFloatValue('');
       setPrice('');
       setIsStatTrak(false);
+      setIsSouvenir(false);
       setCategory('rifle');
       setRarity('Classified');
       setInspectLink('');
@@ -482,18 +487,41 @@ export default function ManualListing() {
                   Výsledek bude: "{weaponType} | {skinName}"
                 </p>
 
-                {/* StatTrak checkbox */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="statTrak"
-                    checked={isStatTrak}
-                    onChange={(e) => setIsStatTrak(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-700 bg-[#0f1117] text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="statTrak" className="text-sm text-gray-300">
-                    StatTrak™
-                  </label>
+                {/* StatTrak / Souvenir toggles */}
+                <div className="flex items-center gap-6">
+                  {/* StatTrak */}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="statTrak"
+                      checked={isStatTrak}
+                      onChange={(e) => {
+                        setIsStatTrak(e.target.checked);
+                        if (e.target.checked) setIsSouvenir(false);
+                      }}
+                      className="w-4 h-4 rounded border-gray-700 bg-[#0f1117] text-blue-600 focus:ring-blue-500"
+                    />
+                    <label htmlFor="statTrak" className="text-sm text-gray-300">
+                      StatTrak™
+                    </label>
+                  </div>
+
+                  {/* Souvenir */}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="souvenir"
+                      checked={isSouvenir}
+                      onChange={(e) => {
+                        setIsSouvenir(e.target.checked);
+                        if (e.target.checked) setIsStatTrak(false);
+                      }}
+                      className="w-4 h-4 rounded border-gray-700 bg-[#0f1117] text-[#e0c851] focus:ring-[#e0c851]"
+                    />
+                    <label htmlFor="souvenir" className="text-sm text-gray-300">
+                      Souvenir
+                    </label>
+                  </div>
                 </div>
 
                 {/* Opotřebení */}

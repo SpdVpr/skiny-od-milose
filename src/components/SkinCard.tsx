@@ -53,6 +53,11 @@ export default function SkinCard({ skin }: SkinProps) {
                         StatTrak™
                     </div>
                 )}
+                {skin.name.includes('Souvenir') && (
+                    <div className="absolute top-2 left-2 bg-[#e0c851]/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
+                        Souvenir
+                    </div>
+                )}
 
                 {/* Wear Badge - Top Right */}
                 {skin.wear && (

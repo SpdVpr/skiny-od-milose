@@ -58,6 +58,7 @@ export default function InventoryTable() {
     const [editWeaponType, setEditWeaponType] = useState('');
     const [editSkinName, setEditSkinName] = useState('');
     const [editIsStatTrak, setEditIsStatTrak] = useState(false);
+    const [editIsSouvenir, setEditIsSouvenir] = useState(false); // New state
     const [editRarity, setEditRarity] = useState('Classified');
 
     // Sticker management state
@@ -236,15 +237,18 @@ export default function InventoryTable() {
         setEditingSkin({ ...skin });
 
         // Detect StatTrak
-        // Detect StatTrak
         const isStatTrak = skin.name.includes('StatTrak™');
         setEditIsStatTrak(isStatTrak);
+
+        // Detect Souvenir
+        const isSouvenir = skin.name.includes('Souvenir');
+        setEditIsSouvenir(isSouvenir);
 
         // Detect Rarity
         setEditRarity(skin.rarity || 'Classified');
 
-        // Clean name for splitting (remove StatTrak prefix and trim)
-        let cleanName = skin.name.replace('StatTrak™', '').trim();
+        // Clean name for splitting (remove prefixes and trim)
+        let cleanName = skin.name.replace('StatTrak™', '').replace('Souvenir', '').trim();
 
         // Initialize split name fields
         // 1. Try to use existing database structure
@@ -337,7 +341,10 @@ export default function InventoryTable() {
 
         try {
             // Připravíme data bez undefined hodnot
-            const prefix = editIsStatTrak ? 'StatTrak™ ' : '';
+            let prefix = '';
+            if (editIsStatTrak) prefix = 'StatTrak™ ';
+            if (editIsSouvenir) prefix = 'Souvenir ';
+
             const finalName = `${prefix}${editWeaponType.trim()} | ${editSkinName.trim()}`;
 
             const updateData: any = {
@@ -1180,21 +1187,48 @@ export default function InventoryTable() {
                                 </div>
                             </div>
                             <div className="text-xs text-gray-500 -mt-2 mb-2">
-                                Výsledek: <span className="font-semibold">{editIsStatTrak ? 'StatTrak™ ' : ''}{editWeaponType} | {editSkinName}</span>
+                                Výsledek: <span className="font-semibold">
+                                    {editIsStatTrak ? 'StatTrak™ ' : ''}
+                                    {editIsSouvenir ? 'Souvenir ' : ''}
+                                    {editWeaponType} | {editSkinName}
+                                </span>
                             </div>
 
-                            {/* StatTrak checkbox */}
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="edit-statTrak"
-                                    checked={editIsStatTrak}
-                                    onChange={(e) => setEditIsStatTrak(e.target.checked)}
-                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <label htmlFor="edit-statTrak" className="text-sm text-gray-700 font-medium">
-                                    StatTrak™
-                                </label>
+                            {/* StatTrak / Souvenir toggles */}
+                            <div className="flex items-center gap-6">
+                                {/* StatTrak */}
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="edit-statTrak"
+                                        checked={editIsStatTrak}
+                                        onChange={(e) => {
+                                            setEditIsStatTrak(e.target.checked);
+                                            if (e.target.checked) setEditIsSouvenir(false);
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <label htmlFor="edit-statTrak" className="text-sm text-gray-700 font-medium">
+                                        StatTrak™
+                                    </label>
+                                </div>
+
+                                {/* Souvenir */}
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="edit-souvenir"
+                                        checked={editIsSouvenir}
+                                        onChange={(e) => {
+                                            setEditIsSouvenir(e.target.checked);
+                                            if (e.target.checked) setEditIsStatTrak(false);
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-[#e0c851] focus:ring-[#e0c851]"
+                                    />
+                                    <label htmlFor="edit-souvenir" className="text-sm text-gray-700 font-medium" style={{ color: editIsSouvenir ? '#e0c851' : undefined }}>
+                                        Souvenir
+                                    </label>
+                                </div>
                             </div>
 
                             {/* Cena */}

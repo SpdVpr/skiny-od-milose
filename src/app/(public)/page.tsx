@@ -46,7 +46,7 @@ const CATEGORIES = [
     { id: 'other', name: 'Ostatní' },
 ];
 
-type SortOption = 'newest' | 'tradable' | 'alphabetical';
+type SortOption = 'newest' | 'tradable' | 'alphabetical' | 'price_asc' | 'price_desc';
 
 function HomeContent() {
     const searchParams = useSearchParams();
@@ -74,9 +74,6 @@ function HomeContent() {
         const currentSearch = searchParams.toString();
 
         if (newSearch !== currentSearch) {
-            // Using replace to update URL without adding new history entries for every keystroke
-            // But if we want back button to work for filter changes, we might want push.
-            // However, for "navigating back from product", replace is sufficient as long as the URL is correct.
             router.replace(`/?${newSearch}`, { scroll: false });
         }
     }, [searchQuery, selectedCategory, sortBy, router, searchParams]);
@@ -129,7 +126,6 @@ function HomeContent() {
         const lower = steamCategory.toLowerCase();
 
         // 1. Zkontrolujeme, zda to není už naše interní ID (z admin panelu)
-        // Použijeme type assertion nebo find, protože CATEGORIES je const array
         const isInternalId = CATEGORIES.some(c => c.id === lower);
         if (isInternalId && lower !== 'all') {
             return lower;
@@ -187,7 +183,6 @@ function HomeContent() {
             return 'agent';
         }
 
-        // Pokud nic neodpovídá, vrátíme 'other'
         return 'other';
     };
 
@@ -195,33 +190,25 @@ function HomeContent() {
     const filteredSkins = skins.filter(skin => {
         const matchesSearch = skin.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-        // Určíme kategorii:
-        // 1. Pokud má skin.category (ze Steamu nebo manuálně), zmapujeme ho na naši kategorii
-        // 2. Jinak určíme podle názvu (fallback)
+        // KATEGORIE
         let skinCategory = '';
         if (skin.category) {
-            // Máme kategorii ze Steamu nebo manuálně - zmapujeme ji
             skinCategory = mapSteamCategory(skin.category);
         }
-
-        // Pokud mapování nevrátilo nic nebo je 'other', zkusíme určit podle názvu
         if (!skinCategory || skinCategory === 'other') {
             const nameCategory = getCategoryFromName(skin.name);
             if (nameCategory !== 'other') {
                 skinCategory = nameCategory;
             }
         }
-
-        // Debug log pro první skin nebo všechny pro diagnostiku
-        // console.log(`[FILTER] Skin: ${skin.name}, Raw Category: ${skin.category}, Mapped: ${skinCategory}, Selected: ${selectedCategory}`);
-
-        // Pokud je vybraná kategorie 'all', zobrazíme vše
-        // Jinak musí kategorie odpovídat
         const matchesCategory = selectedCategory === 'all' || skinCategory === selectedCategory;
 
-        return matchesSearch && matchesCategory;
+        // TRADABLE FILTER - pokud je vybrána možnost "tradable", filtrujeme jen tradable itemy
+        const matchesTradable = sortBy === 'tradable' ? skin.tradable : true;
+
+        return matchesSearch && matchesCategory && matchesTradable;
     }).sort((a, b) => {
-        // 1. Sort hidden items to the bottom
+        // 1. Sort hidden items to the bottom (shouldn't happen on public page due to initial validaiton, but keeping safety)
         if (a.isVisible !== b.isVisible) {
             return a.isVisible ? -1 : 1;
         }
@@ -230,14 +217,31 @@ function HomeContent() {
             // Seconds comparison
             const secondsDiff = (skinB.updatedAt?.seconds || 0) - (skinA.updatedAt?.seconds || 0);
             if (secondsDiff !== 0) return secondsDiff;
-
             // Fallback: Normal ID order (A-Z)
             return skinA.assetId.localeCompare(skinB.assetId);
         };
 
-        if (sortBy === 'newest') {
+        // PRICE Sorting
+        if (sortBy === 'price_asc') {
+            const priceA = a.price || 0;
+            const priceB = b.price || 0;
+            // If price is 0 (on request), maybe put it last? User didn't specify.
+            // Let's standard sort: 0 comes first.
+            if (priceA !== priceB) return priceA - priceB;
+            return compareDates(a, b);
+        }
+        if (sortBy === 'price_desc') {
+            const priceA = a.price || 0;
+            const priceB = b.price || 0;
+            if (priceA !== priceB) return priceB - priceA;
+            return compareDates(a, b);
+        }
+
+        if (sortBy === 'newest' || sortBy === 'tradable') {
             // Logic: Items WITHOUT orderIndex come FIRST (sorted by date)
             // Items WITH orderIndex come LAST (sorted by index ASC)
+            // NOTE: If we are in 'tradable' mode, we already filtered for tradable items, 
+            // so now we just sort them by newest/order logic.
 
             const aHasOrder = typeof a.orderIndex === 'number';
             const bHasOrder = typeof b.orderIndex === 'number';
@@ -256,13 +260,7 @@ function HomeContent() {
             // Neither has order -> Sort by date
             return compareDates(a, b);
         }
-        if (sortBy === 'tradable') {
-            // Tradable first
-            if (a.tradable === b.tradable) {
-                return compareDates(a, b);
-            }
-            return (a.tradable ? -1 : 1);
-        }
+
         if (sortBy === 'alphabetical') {
             return a.name.localeCompare(b.name);
         }
@@ -387,7 +385,6 @@ function HomeContent() {
                             </div>
 
                             {/* Sort Dropdown */}
-                            {/* Sort Dropdown */}
                             <div className="relative">
                                 <select
                                     value={sortBy}
@@ -395,6 +392,8 @@ function HomeContent() {
                                     className="pl-4 pr-12 py-2.5 bg-[#161616] border border-[#161616] text-white rounded-xl focus:outline-none focus:border-gray-500 transition-all cursor-pointer appearance-none"
                                 >
                                     <option value="newest">Nejnovější</option>
+                                    <option value="price_asc">Nejlevnější</option>
+                                    <option value="price_desc">Nejdražší</option>
                                     <option value="tradable">Tradable</option>
                                     <option value="alphabetical">Abecedně</option>
                                 </select>

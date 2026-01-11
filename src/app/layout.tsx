@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     description: 'Výkup, prodej i skiny na objednávku – vše na jednom místě. Bezpečnost, rychlost a spolehlivost. Tisíce uzavřených obchodů a stovky spokojených zákazníků.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/social.png',
         width: 1200,
         height: 630,
         alt: 'Skiny od Miloše - CS2 Skiny',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Skiny od Miloše CS2 Skiny',
     description: 'Výkup, prodej i skiny na objednávku – vše na jednom místě. Bezpečnost, rychlost a spolehlivost.',
-    images: ['/og-image.jpg'],
+    images: ['/social.png'],
   },
   robots: {
     index: true,
