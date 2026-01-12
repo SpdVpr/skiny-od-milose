@@ -54,7 +54,7 @@ export default function SkinCard({ skin }: SkinProps) {
                     </div>
                 )}
                 {skin.name.includes('Souvenir') && (
-                    <div className="absolute top-2 left-2 bg-[#e0c851]/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
+                    <div className="absolute top-2 left-2 bg-[#b8a335]/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
                         Souvenir
                     </div>
                 )}

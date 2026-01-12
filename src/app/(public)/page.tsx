@@ -204,7 +204,10 @@ function HomeContent() {
         const matchesCategory = selectedCategory === 'all' || skinCategory === selectedCategory;
 
         // TRADABLE FILTER - pokud je vybrána možnost "tradable", filtrujeme jen tradable itemy
-        const matchesTradable = sortBy === 'tradable' ? skin.tradable : true;
+        // Tradable znamená: tradable: true A ZÁROVEŇ (tradeRestrictionDate není nastaven NEBO je v minulosti)
+        const matchesTradable = sortBy === 'tradable'
+            ? (skin.tradable && (!skin.tradeRestrictionDate || new Date(skin.tradeRestrictionDate) <= new Date()))
+            : true;
 
         return matchesSearch && matchesCategory && matchesTradable;
     }).sort((a, b) => {
