@@ -8,7 +8,7 @@ interface SkinStatsProps {
 
 export default function SkinStats({ skin }: SkinStatsProps) {
   return (
-    <div className="bg-[#161616] rounded-xl p-4 space-y-3 border border-[#161616]">
+    <div className="bg-[#161616] rounded-xl p-3 lg:p-4 grid grid-cols-2 lg:flex lg:flex-col gap-3 border border-[#161616]">
       {/* Float Value */}
       {skin.floatValue !== undefined && (
         <div className="flex items-center gap-3">
@@ -99,7 +99,7 @@ export default function SkinStats({ skin }: SkinStatsProps) {
 
       {/* Stickers */}
       {skin.stickers && skin.stickers.length > 0 && (
-        <div className="pt-2 border-t border-[#161616]">
+        <div className="pt-2 border-t border-[#161616] col-span-2 lg:col-span-1">
           <div className="text-xs text-gray-400 font-medium mb-2 flex items-center gap-2">
             <Shield size={14} />
             Stickery ({skin.stickers.length})

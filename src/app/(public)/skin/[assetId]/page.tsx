@@ -114,37 +114,69 @@ export default function SkinDetailPage() {
             />
             <div className="fixed inset-0 z-0 bg-black/86" />
 
-            <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ maxWidth: '1500px' }}>
-                {/* Back Button */}
+            <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6" style={{ maxWidth: '1500px' }}>
+                {/* Back Button - když není historie (přímý vstup / refresh), vrátí na katalog */}
                 <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-gray-400 hover:text-white mb-3 transition-colors"
+                    onClick={() => {
+                        if (typeof window !== 'undefined' && window.history.length > 1) {
+                            router.back();
+                        } else {
+                            router.push('/');
+                        }
+                    }}
+                    className="flex items-center gap-2 text-gray-400 hover:text-white mb-3 transition-colors py-2 pr-3 -ml-1 pl-1"
                 >
                     <ArrowLeft size={20} />
                     Zpět
                 </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 h-full">
-                    {/* Left Column - Images */}
-                    <div className="space-y-4">
-                        {/* Main Image - Logika:
-                            1. Pokud existuje detailImageUrl → zobrazí se jen tento obrázek
-                            2. Jinak: Custom Screenshot OR Steam Image
-                        */}
+                {/* Název itemu - na celou šířku nad kartami (symetrické) */}
+                <h1 className="text-base sm:text-lg lg:text-xl font-medium text-gray-200 mb-3 leading-tight text-center lg:text-left">
+                    {skin.name}
+                </h1>
+
+                <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr] gap-3 lg:gap-4 items-stretch">
+                    {/* Levý sloupec - Obrázek (na mobilu vlevo a vyplní výšku, na PC původní) */}
+                    <div className="h-full">
+                        {/* Mobilní obrázek - object-contain, zachová poměr stran (celý obrázek), vlevo vedle ceny */}
                         <div
-                            className="bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex flex-col justify-start h-[50vh] lg:h-auto lg:max-h-[1000px] cursor-pointer"
+                            className="lg:hidden relative bg-[#161616] rounded-2xl border border-[#161616] overflow-hidden h-full min-h-[30vh] cursor-pointer"
                             onClick={() => setIsImageModalOpen(true)}
                         >
                             {skin.detailImageUrl ? (
-                                <>
-                                    <div className="flex-1 min-h-0 flex items-start justify-center">
-                                        <img
-                                            src={skin.detailImageUrl}
-                                            alt={`${skin.name} - Detail`}
-                                            className="h-full rounded-lg object-contain lg:object-cover lg:object-top w-full lg:w-[70%]"
-                                        />
-                                    </div>
-                                </>
+                                <img
+                                    src={skin.detailImageUrl}
+                                    alt={`${skin.name} - Detail`}
+                                    className="absolute inset-0 w-full h-full object-contain p-1"
+                                />
+                            ) : (
+                                <div className="absolute inset-0 p-1">
+                                    <SkinImageWithStickers
+                                        skin={skin}
+                                        className="w-full h-full"
+                                        showStickers={true}
+                                        cropTop={0}
+                                        imageObjectFit="contain"
+                                        imageObjectPosition="center center"
+                                        imageClassName="!object-contain"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Desktopový obrázek - původní zobrazení */}
+                        <div
+                            className="hidden lg:flex bg-[#161616] rounded-2xl p-1 shadow-lg border border-[#161616] overflow-hidden flex-col justify-start lg:h-auto lg:max-h-[1000px] cursor-pointer"
+                            onClick={() => setIsImageModalOpen(true)}
+                        >
+                            {skin.detailImageUrl ? (
+                                <div className="flex-1 min-h-0 flex items-start justify-center">
+                                    <img
+                                        src={skin.detailImageUrl}
+                                        alt={`${skin.name} - Detail`}
+                                        className="h-full rounded-lg object-cover object-top w-[70%]"
+                                    />
+                                </div>
                             ) : (
                                 <div className="relative rounded-lg overflow-hidden h-full flex items-center justify-center w-full">
                                     <SkinImageWithStickers
@@ -154,32 +186,23 @@ export default function SkinDetailPage() {
                                         cropTop={0}
                                         imageObjectFit="cover"
                                         imageObjectPosition="center top"
-                                        imageClassName="!object-contain lg:!object-cover"
+                                        imageClassName="!object-cover"
                                     />
                                 </div>
                             )}
                         </div>
-
-
                     </div>
 
-                    {/* Right Column - Info */}
-                    <div className="space-y-4">
-                        {/* Title */}
-                        <div>
-                            <h1 className="text-xl font-medium text-gray-300 mb-1">
-                                {skin.name}
-                            </h1>
-                        </div>
-
+                    {/* Pravý sloupec - Cena */}
+                    <div className="space-y-3 lg:space-y-4">
                         {/* Price - Always First */}
                         <div className="bg-[#161616] text-white rounded-xl p-3 shadow-lg border border-[#161616]">
                             <div className="flex items-center justify-center gap-3 mb-2">
                                 <span className="text-lg font-medium text-white">Cena</span>
                             </div>
-                            <div className="flex items-center justify-center gap-4 mb-2">
-                                <div className="bg-[#161616] border border-gray-600 px-6 py-2 rounded-xl shadow-lg">
-                                    <div className="text-3xl font-bold text-center text-white tracking-wide">
+                            <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-4 mb-2">
+                                <div className="bg-[#161616] border border-gray-600 px-3 py-1.5 lg:px-6 lg:py-2 rounded-xl shadow-lg">
+                                    <div className="text-2xl lg:text-3xl font-bold text-center text-white tracking-wide">
                                         {skin.price ? (
                                             (() => {
                                                 if (currency === 'CZK') {
@@ -213,8 +236,8 @@ export default function SkinDetailPage() {
                                 )}
                             </div>
 
-                            {/* Price Disclaimer - MOVED UP */}
-                            <div className="mt-3 mb-3 pt-3 border-t border-[#161616] text-center">
+                            {/* Price Disclaimer - na PC v kartě, na mobilu je pod obrázkem (aby karta nebyla vysoká) */}
+                            <div className="hidden lg:block lg:mt-3 lg:mb-3 lg:pt-3 border-t border-[#161616] text-center">
                                 <p className="text-sm text-white italic">
                                     Tato cena je pouze orientační a je nutné jí ověřit.
                                     <br />
@@ -261,25 +284,21 @@ export default function SkinDetailPage() {
                                 );
                             })()}
 
-                            {/* Contact Button */}
-                            <div className="mt-4 pt-4 border-t border-[#161616] flex justify-center">
+                            {/* Contact Button - vycentrované */}
+                            <div className="mt-3 pt-3 lg:mt-4 lg:pt-4 border-t border-[#161616] flex justify-center">
                                 <a
                                     href="https://www.facebook.com/skinyodmilose"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg"
+                                    className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2.5 lg:px-8 lg:py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg text-sm lg:text-base w-full lg:w-auto whitespace-nowrap"
                                 >
-                                    <Facebook size={20} />
+                                    <Facebook size={18} />
                                     Kontaktuj mě
                                 </a>
                             </div>
 
 
                         </div>
-
-
-
-                        {/* Float & Pattern Removed as requested */}
 
                         {/* Doppler Phase (pokud je to doppler) */}
                         {skin.dopplerPhase && (
@@ -294,8 +313,10 @@ export default function SkinDetailPage() {
                             </div>
                         )}
 
-                        {/* Stats Component */}
-                        <SkinStats skin={skin} />
+                        {/* Stats Component - na PC ve sloupci vedle obrázku; na mobilu je dole pod obrázkem */}
+                        <div className="hidden lg:block">
+                            <SkinStats skin={skin} />
+                        </div>
 
                         {/* Stickers Detail (if any) */}
                         {skin.stickers && skin.stickers.length > 0 && (
@@ -339,11 +360,11 @@ export default function SkinDetailPage() {
                             </div>
                         )}
 
-                        {/* Inspect in Game Button */}
+                        {/* Inspect in Game Button – skryté na mobilu (steam:// CS2 odkaz funguje jen na PC), zobrazené od md výš */}
                         {skin.inspectLink && (
                             <a
                                 href={skin.inspectLink}
-                                className="block bg-gray-700 rounded-2xl p-6 text-white shadow-lg hover:bg-gray-600 transition-all"
+                                className="hidden md:block bg-gray-700 rounded-2xl p-6 text-white shadow-lg hover:bg-gray-600 transition-all"
                             >
                                 <div className="text-center">
                                     <div className="text-sm font-bold mb-2">
@@ -362,6 +383,14 @@ export default function SkinDetailPage() {
 
                         {/* Additional Info Removed as requested */}
                     </div>
+                </div>
+
+                {/* Statistiky + upozornění k ceně na mobilu - pod obrázkem, na celou šířku */}
+                <div className="lg:hidden mt-3 space-y-3">
+                    <SkinStats skin={skin} />
+                    <p className="text-[11px] leading-snug text-center text-gray-400 italic px-2">
+                        Tato cena je pouze orientační a je nutné jí ověřit. Nacenění skinů vychází z prodejních dat nejověřenějších obchodních stránek.
+                    </p>
                 </div>
             </div>
             {/* Image Modal */}

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, updateDoc, setDoc, query, orderBy, writeBatch, deleteDoc, Timestamp } from 'firebase/firestore';
-import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2, Copy, Plus, ListOrdered, RefreshCw } from 'lucide-react';
+import { collection, getDocs, doc, updateDoc, setDoc, query, orderBy, writeBatch, deleteDoc, deleteField, Timestamp } from 'firebase/firestore';
+import { Eye, EyeOff, Save, Search, CheckSquare, Square, Sparkles, Edit, X, Trash2, Copy, Plus, ListOrdered, RefreshCw, Undo2, Redo2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skin, SkinUtils, SkinSticker } from '@/types/skin';
 import SkinStats from '@/components/SkinStats';
@@ -29,6 +29,41 @@ const RARITY_OPTIONS = [
     { value: 'Contraband', label: 'Contraband (Pašovaná)', color: 'e4ae39' },
 ];
 
+// ===== Lokalizace rarity/kondice =====
+// DB má hodnoty často česky (sync ze Steamu), ale dropdowny jsou anglické.
+// Mapy znají CZ i EN název → kanonická hodnota z RARITY_OPTIONS / WEAR_OPTIONS.
+const RARITY_ALIASES: Record<string, string> = {
+    'consumer grade': 'Consumer Grade', 'spotřební jakost': 'Consumer Grade', 'běžná': 'Consumer Grade',
+    'industrial grade': 'Industrial Grade', 'průmyslová': 'Industrial Grade',
+    'mil-spec grade': 'Mil-Spec Grade', 'armádní': 'Mil-Spec Grade', 'vojenská': 'Mil-Spec Grade',
+    'restricted': 'Restricted', 'zakázaná': 'Restricted',
+    'classified': 'Classified', 'skrytá': 'Classified', 'utajená': 'Classified', 'důvěrná': 'Classified',
+    'covert': 'Covert', 'tajná': 'Covert',
+    'contraband': 'Contraband', 'pašovaná': 'Contraband',
+};
+
+const WEAR_ALIASES: Record<string, string> = {
+    'factory new': 'Factory New', 'zbrusu nový': 'Factory New',
+    'minimal wear': 'Minimal Wear', 'lehce opotřebený': 'Minimal Wear',
+    'field-tested': 'Field-Tested', 'opotřebený': 'Field-Tested',
+    'well-worn': 'Well-Worn', 'silně opotřebený': 'Well-Worn',
+    'battle-scarred': 'Battle-Scarred', 'poničený bojem': 'Battle-Scarred',
+};
+
+// Kanonická (EN) hodnota rarity z RARITY_OPTIONS, nebo undefined když neznáme
+const canonicalRarity = (raw?: string): string | undefined =>
+    raw ? RARITY_ALIASES[raw.trim().toLowerCase()] : undefined;
+
+// Kanonická (EN) hodnota kondice z WEAR_OPTIONS, nebo undefined když neznáme
+const canonicalWear = (raw?: string): string | undefined =>
+    raw ? WEAR_ALIASES[raw.trim().toLowerCase()] : undefined;
+
+// Barva rarity podle CZ/EN názvu; undefined když neznáme (pak barvu NEpřepisujeme)
+const rarityColorFor = (raw?: string): string | undefined => {
+    const canon = canonicalRarity(raw);
+    return canon ? RARITY_OPTIONS.find(r => r.value === canon)?.color : undefined;
+};
+
 // Kategorie zbraní
 const CATEGORIES = [
     { id: 'all', name: 'Vše' },
@@ -41,6 +76,40 @@ const CATEGORIES = [
     { id: 'agent', name: 'Agenti' },
     { id: 'other', name: 'Ostatní' },
 ];
+
+// ===== Undo / Redo (Zpět / Vpřed) – pomocné typy a funkce =====
+
+// Maximální počet kroků, které si historie pamatuje
+const HISTORY_LIMIT = 50;
+
+// Snapshot dotčených dokumentů: assetId -> plný skin (obnovit) nebo null (smazat / neexistoval)
+type SkinSnapshot = Record<string, Skin | null>;
+
+interface HistoryEntry {
+    label: string;
+    before: SkinSnapshot;
+    after: SkinSnapshot;
+}
+
+// Mělká kopie skinu – zachová Timestamp instanci (updatedAt) a naklonuje pole stickerů
+const cloneSkin = (s: Skin): Skin => ({
+    ...s,
+    stickers: s.stickers ? s.stickers.map(st => ({ ...st })) : s.stickers,
+});
+
+// Připraví data dokumentu pro zápis do Firestore (vyřadí assetId a undefined hodnoty)
+const stripDoc = (s: Skin): Record<string, unknown> =>
+    Object.fromEntries(Object.entries(s).filter(([k, v]) => k !== 'assetId' && v !== undefined));
+
+// Porovná dvě hodnoty pole (primitiva i objekty/pole/Timestamp)
+const fieldsEqual = (a: unknown, b: unknown): boolean => {
+    if (a === b) return true;
+    if (a == null || b == null) return a === b;
+    if (typeof a === 'object' || typeof b === 'object') {
+        try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
+    }
+    return false;
+};
 
 export default function InventoryTable() {
     const [skins, setSkins] = useState<Skin[]>([]);
@@ -65,6 +134,12 @@ export default function InventoryTable() {
     const [stickerSearchQuery, setStickerSearchQuery] = useState<string[]>([]);
     const [showStickerDropdown, setShowStickerDropdown] = useState<number | null>(null);
 
+    // ===== Undo / Redo historie (Zpět / Vpřed) =====
+    const [undoStack, setUndoStack] = useState<HistoryEntry[]>([]);
+    const [redoStack, setRedoStack] = useState<HistoryEntry[]>([]);
+    // Poslední uložený (committed) stav dokumentů – zdroj pravdy pro "před" snapshoty
+    const committedRef = useRef<Map<string, Skin>>(new Map());
+
     useEffect(() => {
         fetchSkins();
     }, []);
@@ -87,6 +162,8 @@ export default function InventoryTable() {
                 ...doc.data()
             })) as Skin[];
             setSkins(skinsData);
+            // Uložíme committed stav pro potřeby historie Zpět/Vpřed
+            committedRef.current = new Map(skinsData.map(s => [s.assetId, cloneSkin(s)]));
         } catch (error) {
             console.error("Error fetching skins:", error);
             toast.error("Failed to load inventory");
@@ -94,6 +171,179 @@ export default function InventoryTable() {
             setLoading(false);
         }
     };
+
+    // Přepne dotčené dokumenty ze stavu `fromMap` do stavu `toMap`.
+    // Zapíše JEN reálně změněná pole (updateDoc), takže nepřepíše souběžné úpravy jiných polí
+    // (např. nahraný screenshot). Vytvoření/smazání dokumentu řeší set/delete.
+    const applyTransition = useCallback(async (fromMap: SkinSnapshot, toMap: SkinSnapshot) => {
+        const ids = Array.from(new Set([...Object.keys(fromMap), ...Object.keys(toMap)]));
+
+        type Plan =
+            | { id: string; kind: 'delete' }
+            | { id: string; kind: 'create'; full: Skin }
+            | { id: string; kind: 'update'; patch: Record<string, unknown> };
+        const plans: Plan[] = [];
+
+        ids.forEach(id => {
+            const from = id in fromMap ? fromMap[id] : null;
+            const to = id in toMap ? toMap[id] : null;
+            if (to === null && from !== null) {
+                plans.push({ id, kind: 'delete' });
+            } else if (to !== null && from === null) {
+                plans.push({ id, kind: 'create', full: to });
+            } else if (to !== null && from !== null) {
+                const patch: Record<string, unknown> = {};
+                const fromRec = from as unknown as Record<string, unknown>;
+                const toRec = to as unknown as Record<string, unknown>;
+                const keys = new Set([...Object.keys(from), ...Object.keys(to)]);
+                keys.forEach(k => {
+                    if (k === 'assetId') return;
+                    if (!fieldsEqual(fromRec[k], toRec[k])) {
+                        patch[k] = toRec[k];
+                    }
+                });
+                if (Object.keys(patch).length > 0) plans.push({ id, kind: 'update', patch });
+            }
+        });
+
+        // Zápis do Firestore po dávkách (limit batch je 500)
+        for (let i = 0; i < plans.length; i += 400) {
+            const batch = writeBatch(db);
+            plans.slice(i, i + 400).forEach(p => {
+                const ref = doc(db, 'skins', p.id);
+                if (p.kind === 'delete') {
+                    batch.delete(ref);
+                } else if (p.kind === 'create') {
+                    batch.set(ref, stripDoc(p.full));
+                } else {
+                    const fsPatch: Record<string, unknown> = {};
+                    Object.entries(p.patch).forEach(([k, v]) => {
+                        fsPatch[k] = v === undefined ? deleteField() : v;
+                    });
+                    batch.update(ref, fsPatch);
+                }
+            });
+            await batch.commit();
+        }
+
+        // Lokální stav
+        setSkins(prev => {
+            const next = [...prev];
+            plans.forEach(p => {
+                const idx = next.findIndex(x => x.assetId === p.id);
+                if (p.kind === 'delete') {
+                    if (idx !== -1) next.splice(idx, 1);
+                } else if (p.kind === 'create') {
+                    if (idx !== -1) next[idx] = p.full; else next.push(p.full);
+                } else if (idx !== -1) {
+                    const merged = { ...next[idx] } as Record<string, unknown>;
+                    Object.entries(p.patch).forEach(([k, v]) => {
+                        if (v === undefined) delete merged[k]; else merged[k] = v;
+                    });
+                    next[idx] = merged as unknown as Skin;
+                }
+            });
+            return next;
+        });
+
+        // Committed stav (zdroj pravdy pro budoucí "před" snapshoty)
+        plans.forEach(p => {
+            if (p.kind === 'delete') {
+                committedRef.current.delete(p.id);
+            } else if (p.kind === 'create') {
+                committedRef.current.set(p.id, cloneSkin(p.full));
+            } else {
+                const cur = committedRef.current.get(p.id);
+                if (cur) {
+                    const merged = { ...cur } as Record<string, unknown>;
+                    Object.entries(p.patch).forEach(([k, v]) => {
+                        if (v === undefined) delete merged[k]; else merged[k] = v;
+                    });
+                    committedRef.current.set(p.id, merged as unknown as Skin);
+                }
+            }
+        });
+    }, []);
+
+    // Zaznamená provedenou změnu do historie. `after` = nový stav dotčených dokumentů
+    // (plný objekt, nebo null pokud byl dokument smazán). "before" se odvodí z committed stavu.
+    const recordHistory = useCallback((label: string, after: SkinSnapshot) => {
+        const before: SkinSnapshot = {};
+        Object.keys(after).forEach(id => {
+            const c = committedRef.current.get(id);
+            before[id] = c ? cloneSkin(c) : null;
+        });
+        // Posuneme committed stav na nový (after)
+        Object.entries(after).forEach(([id, s]) => {
+            if (s === null) committedRef.current.delete(id);
+            else committedRef.current.set(id, cloneSkin(s));
+        });
+        setUndoStack(prev => [...prev, { label, before, after }].slice(-HISTORY_LIMIT));
+        setRedoStack([]);
+    }, []);
+
+    const undo = useCallback(async () => {
+        if (isBulkUpdating) return;
+        if (undoStack.length === 0) {
+            toast.info('Není co vrátit zpět');
+            return;
+        }
+        const entry = undoStack[undoStack.length - 1];
+        setIsBulkUpdating(true);
+        try {
+            await applyTransition(entry.after, entry.before);
+            setUndoStack(prev => prev.slice(0, -1));
+            setRedoStack(prev => [...prev, entry]);
+            toast.success(`↩️ Vráceno zpět: ${entry.label}`);
+        } catch (error) {
+            console.error('Undo error:', error);
+            toast.error('Chyba při vracení změny');
+        } finally {
+            setIsBulkUpdating(false);
+        }
+    }, [isBulkUpdating, undoStack, applyTransition]);
+
+    const redo = useCallback(async () => {
+        if (isBulkUpdating) return;
+        if (redoStack.length === 0) {
+            toast.info('Není co provést znovu');
+            return;
+        }
+        const entry = redoStack[redoStack.length - 1];
+        setIsBulkUpdating(true);
+        try {
+            await applyTransition(entry.before, entry.after);
+            setRedoStack(prev => prev.slice(0, -1));
+            setUndoStack(prev => [...prev, entry]);
+            toast.success(`↪️ Znovu provedeno: ${entry.label}`);
+        } catch (error) {
+            console.error('Redo error:', error);
+            toast.error('Chyba při opakování změny');
+        } finally {
+            setIsBulkUpdating(false);
+        }
+    }, [isBulkUpdating, redoStack, applyTransition]);
+
+    // Klávesové zkratky: Ctrl/Cmd+Z = Zpět, Ctrl/Cmd+Y nebo Ctrl/Cmd+Shift+Z = Vpřed.
+    // Ignorujeme, pokud je fokus ve formulářovém poli (aby fungovalo běžné undo v inputu).
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            const tag = target?.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
+            if (!(e.ctrlKey || e.metaKey)) return;
+            const key = e.key.toLowerCase();
+            if (key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+            } else if (key === 'y' || (key === 'z' && e.shiftKey)) {
+                e.preventDefault();
+                redo();
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [undo, redo]);
 
     const handlePriceChange = (assetId: string, newPrice: string) => {
         const price = parseFloat(newPrice);
@@ -108,6 +358,10 @@ export default function InventoryTable() {
         try {
             await updateDoc(doc(db, 'skins', skin.assetId), {
                 price: skin.price
+            });
+            const base = committedRef.current.get(skin.assetId);
+            recordHistory(`Cena – ${skin.name}`, {
+                [skin.assetId]: { ...(base ? cloneSkin(base) : cloneSkin(skin)), price: skin.price },
             });
             toast.success(`Price updated for ${skin.name}`);
         } catch (error) {
@@ -129,6 +383,10 @@ export default function InventoryTable() {
             await updateDoc(doc(db, 'skins', skin.assetId), {
                 orderIndex: skin.orderIndex === undefined ? null : skin.orderIndex
             });
+            const base = committedRef.current.get(skin.assetId);
+            recordHistory(`Pořadí – ${skin.name}`, {
+                [skin.assetId]: { ...(base ? cloneSkin(base) : cloneSkin(skin)), orderIndex: skin.orderIndex },
+            });
             toast.success(`Pořadí uloženo pro ${skin.name}`);
         } catch (error) {
             toast.error("Chyba při ukládání pořadí");
@@ -144,6 +402,10 @@ export default function InventoryTable() {
             setSkins(prev => prev.map(s =>
                 s.assetId === skin.assetId ? { ...s, isVisible: newVisibility } : s
             ));
+            const base = committedRef.current.get(skin.assetId);
+            recordHistory(`Viditelnost – ${skin.name}`, {
+                [skin.assetId]: { ...(base ? cloneSkin(base) : cloneSkin(skin)), isVisible: newVisibility },
+            });
             toast.success(`Visibility ${newVisibility ? 'enabled' : 'disabled'} for ${skin.name}`);
         } catch (error) {
             toast.error("Failed to update visibility");
@@ -191,6 +453,13 @@ export default function InventoryTable() {
                 selectedSkins.has(skin.assetId) ? { ...skin, isVisible } : skin
             ));
 
+            const after: SkinSnapshot = {};
+            selectedSkins.forEach(assetId => {
+                const base = committedRef.current.get(assetId);
+                if (base) after[assetId] = { ...cloneSkin(base), isVisible };
+            });
+            recordHistory(`Hromadná viditelnost (${selectedSkins.size})`, after);
+
             toast.success(`${selectedSkins.size} skinů ${isVisible ? 'zobrazeno' : 'skryto'}`);
             setSelectedSkins(new Set());
         } catch (error) {
@@ -222,6 +491,13 @@ export default function InventoryTable() {
             setSkins(prev => prev.map(skin =>
                 selectedSkins.has(skin.assetId) ? { ...skin, category } : skin
             ));
+
+            const after: SkinSnapshot = {};
+            selectedSkins.forEach(assetId => {
+                const base = committedRef.current.get(assetId);
+                if (base) after[assetId] = { ...cloneSkin(base), category };
+            });
+            recordHistory(`Hromadná kategorie (${selectedSkins.size})`, after);
 
             toast.success(`Kategorie změněna pro ${selectedSkins.size} skinů`);
             setSelectedSkins(new Set());
@@ -363,10 +639,11 @@ export default function InventoryTable() {
             if (editingSkin.inspectLink) updateData.inspectLink = editingSkin.inspectLink;
             if (editingSkin.phase) updateData.phase = editingSkin.phase;
 
-            // Wear
+            // Wear – exterior odvodíme z kanonické hodnoty (funguje pro CZ i EN název kondice)
             if (editingSkin.wear) {
                 updateData.wear = editingSkin.wear;
-                const exterior = WEAR_OPTIONS.find(w => w.value === editingSkin.wear)?.internal;
+                const canonWear = canonicalWear(editingSkin.wear) || editingSkin.wear;
+                const exterior = WEAR_OPTIONS.find(w => w.value === canonWear)?.internal;
                 if (exterior) updateData.exterior = exterior;
             }
 
@@ -390,15 +667,29 @@ export default function InventoryTable() {
 
             if (editingSkin.tradeRestrictionDate) updateData.tradeRestrictionDate = editingSkin.tradeRestrictionDate;
 
-            // Rarity
+            // Rarity – barvu nastavíme jen když raritu známe (CZ i EN). Když ne (agentí rarity,
+            // neznámé názvy), barvu NEpřepisujeme – zůstane původní správná ze Steamu.
             updateData.rarity = editRarity;
-            updateData.rarityColor = RARITY_OPTIONS.find(r => r.value === editRarity)?.color || 'd32ce6';
+            const resolvedRarityColor = rarityColorFor(editRarity);
+            if (resolvedRarityColor) {
+                updateData.rarityColor = resolvedRarityColor;
+            }
 
             await updateDoc(doc(db, 'skins', editingSkin.assetId), updateData);
 
             setSkins(prev => prev.map(s =>
                 s.assetId === editingSkin.assetId ? { ...s, ...updateData, name: finalName, weaponType: editWeaponType.trim() } : s
             ));
+
+            const editBase = committedRef.current.get(editingSkin.assetId);
+            recordHistory(`Úprava – ${finalName}`, {
+                [editingSkin.assetId]: {
+                    ...(editBase ? cloneSkin(editBase) : cloneSkin(editingSkin)),
+                    ...updateData,
+                    name: finalName,
+                    weaponType: editWeaponType.trim(),
+                } as Skin,
+            });
 
             toast.success('Produkt úspěšně upraven!');
             setShowEditModal(false);
@@ -415,7 +706,7 @@ export default function InventoryTable() {
             return;
         }
 
-        if (!confirm(`Opravdu chcete smazat ${selectedSkins.size} označených skinů? Tato akce je nevratná.`)) {
+        if (!confirm(`Opravdu chcete smazat ${selectedSkins.size} označených skinů? (Akci lze vrátit tlačítkem Zpět.)`)) {
             return;
         }
 
@@ -429,6 +720,10 @@ export default function InventoryTable() {
             });
 
             await batch.commit();
+
+            const after: SkinSnapshot = {};
+            selectedSkins.forEach(assetId => { after[assetId] = null; });
+            recordHistory(`Smazání (${selectedSkins.size})`, after);
 
             setSkins(prev => prev.filter(skin => !selectedSkins.has(skin.assetId)));
 
@@ -468,6 +763,10 @@ export default function InventoryTable() {
             // Uložíme do Firestore (použijeme setDoc pro vytvoření nového dokumentu)
             await setDoc(doc(db, 'skins', newAssetId), cleanedData);
 
+            recordHistory(`Kopie – ${skin.name}`, {
+                [newAssetId]: { assetId: newAssetId, ...cleanedData } as Skin,
+            });
+
             toast.success(`Skin "${skin.name}" byl zkopírován! Kopie je skrytá a můžete ji upravit.`);
 
             // Obnovíme data z databáze
@@ -495,6 +794,7 @@ export default function InventoryTable() {
         setIsBulkUpdating(true);
         let successCount = 0;
         let errorCount = 0;
+        const after: SkinSnapshot = {};
 
         toast.info(`Načítám CSFloat data pro ${skinsWithInspectLink.length} skinů...`);
 
@@ -537,6 +837,9 @@ export default function InventoryTable() {
                                 : s
                         ));
 
+                        const csBase = committedRef.current.get(skin.assetId);
+                        if (csBase) after[skin.assetId] = { ...cloneSkin(csBase), ...updateData } as Skin;
+
                         successCount++;
                         console.log(`✅ [CSFloat] Updated ${skin.name}`);
                     } else {
@@ -551,6 +854,10 @@ export default function InventoryTable() {
                     errorCount++;
                     console.error(`❌ [CSFloat] Error for ${skin.name}:`, error);
                 }
+            }
+
+            if (Object.keys(after).length > 0) {
+                recordHistory(`CSFloat (${Object.keys(after).length})`, after);
             }
 
             if (successCount > 0) {
@@ -607,6 +914,13 @@ export default function InventoryTable() {
                 return updatedSkins;
             });
 
+            const orderAfter: SkinSnapshot = {};
+            selectedOrderedSkins.forEach((skin, index) => {
+                const base = committedRef.current.get(skin.assetId);
+                if (base) orderAfter[skin.assetId] = { ...cloneSkin(base), orderIndex: index + 1 };
+            });
+            recordHistory(`Nastavení pořadí 1..${selectedOrderedSkins.length}`, orderAfter);
+
             toast.success(`Pořadí 1-${selectedSkins.size} bylo nastaveno`);
             // setSelectedSkins(new Set()); // Keep selection for potential reverse
         } catch (error) {
@@ -654,6 +968,14 @@ export default function InventoryTable() {
                 }
                 return skin;
             }));
+
+            const reverseAfter: SkinSnapshot = {};
+            selectedSkinsArray.forEach(skin => {
+                const base = committedRef.current.get(skin.assetId);
+                const currentOrder = skin.orderIndex as number;
+                if (base) reverseAfter[skin.assetId] = { ...cloneSkin(base), orderIndex: maxIndex + minIndex - currentOrder };
+            });
+            recordHistory(`Otočení pořadí (${selectedSkinsArray.length})`, reverseAfter);
 
             toast.success(`Pořadí otočeno pro ${selectedSkinsArray.length} skinů`);
         } catch (error) {
@@ -772,6 +1094,33 @@ export default function InventoryTable() {
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Undo / Redo (Zpět / Vpřed) */}
+            <div className="p-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2 flex-wrap">
+                <button
+                    onClick={undo}
+                    disabled={undoStack.length === 0 || isBulkUpdating}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium"
+                    title="Vrátit poslední změnu (Ctrl+Z)"
+                >
+                    <Undo2 size={16} />
+                    Zpět{undoStack.length > 0 ? ` (${undoStack.length})` : ''}
+                </button>
+                <button
+                    onClick={redo}
+                    disabled={redoStack.length === 0 || isBulkUpdating}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium"
+                    title="Provést znovu vrácenou změnu (Ctrl+Y)"
+                >
+                    <Redo2 size={16} />
+                    Vpřed{redoStack.length > 0 ? ` (${redoStack.length})` : ''}
+                </button>
+                <span className="text-xs text-gray-500 ml-2 truncate max-w-md">
+                    {undoStack.length > 0
+                        ? `Poslední změna: ${undoStack[undoStack.length - 1].label}`
+                        : 'Žádné změny k vrácení'}
+                </span>
+            </div>
+
             {/* Search and Bulk Actions */}
             <div className="p-4 border-b border-gray-100 space-y-3">
                 <div className="flex gap-4 items-center">
@@ -1272,10 +1621,16 @@ export default function InventoryTable() {
                                     Rarita (Vzácnost)
                                 </label>
                                 <select
-                                    value={editRarity}
+                                    value={canonicalRarity(editRarity) || editRarity}
                                     onChange={(e) => setEditRarity(e.target.value)}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
                                 >
+                                    {/* Neznámou (např. českou/agentí) raritu ukážeme jako původní, ať je předvybraná správně */}
+                                    {!RARITY_OPTIONS.some(r => r.value === (canonicalRarity(editRarity) || editRarity)) && (
+                                        <option value={canonicalRarity(editRarity) || editRarity}>
+                                            {editRarity} (původní)
+                                        </option>
+                                    )}
                                     {RARITY_OPTIONS.map(option => (
                                         <option key={option.value} value={option.value} style={{ color: `#${option.color}` }}>
                                             {option.label}
@@ -1290,10 +1645,16 @@ export default function InventoryTable() {
                                     Opotřebení (Wear)
                                 </label>
                                 <select
-                                    value={editingSkin.wear || 'Field-Tested'}
+                                    value={canonicalWear(editingSkin.wear) || editingSkin.wear || 'Field-Tested'}
                                     onChange={(e) => setEditingSkin({ ...editingSkin, wear: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
                                 >
+                                    {/* Neznámou kondici (česky / Unknown) ukážeme jako původní, ať je předvybraná správně */}
+                                    {editingSkin.wear && !WEAR_OPTIONS.some(w => w.value === (canonicalWear(editingSkin.wear) || editingSkin.wear)) && (
+                                        <option value={canonicalWear(editingSkin.wear) || editingSkin.wear}>
+                                            {editingSkin.wear} (původní)
+                                        </option>
+                                    )}
                                     {WEAR_OPTIONS.map(option => (
                                         <option key={option.value} value={option.value}>
                                             {option.label}

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Award, Hash, Tag } from 'lucide-react';
+import { Award, Hash, Tag, Camera } from 'lucide-react';
 import { Skin, SkinUtils } from '@/types/skin';
 import SkinImageWithStickers from './SkinImageWithStickers';
 
@@ -66,13 +66,29 @@ export default function SkinCard({ skin }: SkinProps) {
                     </div>
                 )}
 
-                {/* Name Tag Badge */}
-                {skin.nameTag && (
-                    <div className="absolute bottom-2 left-2 bg-amber-500/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm flex items-center gap-1">
-                        <Tag size={12} />
-                        Named
-                    </div>
-                )}
+                {/* Bottom-left stack: Name Tag + Cena */}
+                <div className="absolute bottom-2 left-2 z-10 flex flex-col items-start gap-1">
+                    {skin.nameTag && (
+                        <div className="bg-amber-500/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm flex items-center gap-1">
+                            <Tag size={12} />
+                            Named
+                        </div>
+                    )}
+                    {/* Cena */}
+                    {skin.price ? (
+                        <div className="bg-[#161616]/95 backdrop-blur px-3 py-1.5 rounded-xl text-sm font-bold text-white shadow-md border border-white/10">
+                            {new Intl.NumberFormat('cs-CZ', {
+                                style: 'currency',
+                                currency: 'CZK',
+                                maximumFractionDigits: 0,
+                            }).format(skin.price)}
+                        </div>
+                    ) : (
+                        <div className="bg-[#161616]/95 backdrop-blur px-3 py-1.5 rounded-xl text-sm font-semibold text-gray-300 shadow-md border border-white/10">
+                            Cena na dotaz
+                        </div>
+                    )}
+                </div>
 
                 {/* Stickers Badge */}
                 {skin.stickers && skin.stickers.length > 0 && (
@@ -106,22 +122,31 @@ export default function SkinCard({ skin }: SkinProps) {
                     })()}
 
 
-                    <div className="flex gap-4 text-xs text-white opacity-90 mb-3">
-                        {skin.floatValue !== undefined && (
-                            <span>Float: {(() => {
-                                // Truncate to 4 decimal places without rounding
-                                const str = skin.floatValue.toString();
-                                const decimalIndex = str.indexOf('.');
-                                return decimalIndex === -1 ? str : str.substring(0, decimalIndex + 5);
-                            })()}</span>
-                        )}
-                        {skin.paintSeed !== undefined && (
-                            <span>Pattern: {skin.paintSeed}</span>
-                        )}
+                    {/* Float / Pattern + foťák (vizuální pobídka, že celá karta vede na detail) */}
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-white opacity-90 min-w-0">
+                            {skin.floatValue !== undefined && (
+                                <span>Float: {(() => {
+                                    // Truncate to 4 decimal places without rounding
+                                    const str = skin.floatValue.toString();
+                                    const decimalIndex = str.indexOf('.');
+                                    return decimalIndex === -1 ? str : str.substring(0, decimalIndex + 5);
+                                })()}</span>
+                            )}
+                            {skin.paintSeed !== undefined && (
+                                <span>Pattern: {skin.paintSeed}</span>
+                            )}
+                        </div>
+
+                        {/* Foťák – nemá vlastní akci, klik probublá na kartu a otevře detail. Rozsvítí se při najetí na kartu. */}
+                        <div
+                            className="shrink-0 flex items-center justify-center bg-[#161616] group-hover:bg-gray-800 text-gray-400 group-hover:text-white p-1.5 sm:p-2 rounded-lg border border-gray-800 group-hover:border-gray-600 transition-colors"
+                            title="Zobrazit detail"
+                            aria-hidden="true"
+                        >
+                            <Camera className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" />
+                        </div>
                     </div>
-
-
-
                 </div>
 
             </div>

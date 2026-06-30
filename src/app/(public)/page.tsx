@@ -405,12 +405,12 @@ function HomeContent() {
                         </div>
 
                         {/* Categories */}
-                        <div className="flex flex-wrap justify-center md:justify-end gap-2 flex-grow">
+                        <div className="flex flex-wrap justify-center md:justify-end gap-1.5 sm:gap-2 flex-grow">
                             {CATEGORIES.map(category => (
                                 <button
                                     key={category.id}
                                     onClick={() => setSelectedCategory(category.id)}
-                                    className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
+                                    className={`px-2 py-1.5 text-xs sm:px-5 sm:py-2.5 sm:text-base rounded-lg sm:rounded-xl font-semibold transition-all flex items-center gap-2 ${selectedCategory === category.id
                                         ? 'bg-gray-200 text-gray-900 shadow-lg shadow-white/10'
                                         : 'bg-[#161616] text-gray-300 border border-[#161616] hover:border-[#161616] hover:bg-gray-800'
                                         }`}
@@ -426,13 +426,13 @@ function HomeContent() {
                 <section className="py-6 px-4 sm:px-6 lg:px-8">
                     <div className="mx-auto" style={{ maxWidth: '1500px' }}>
                         {loading ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
                                 {[...Array(12)].map((_, i) => (
                                     <div key={i} className="h-96 bg-[#161616] rounded-2xl animate-pulse border border-[#161616]" />
                                 ))}
                             </div>
                         ) : filteredSkins.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
                                 {filteredSkins.map(skin => (
                                     <SkinCard key={skin.assetId} skin={skin} />
                                 ))}
