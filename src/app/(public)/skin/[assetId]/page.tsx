@@ -130,17 +130,15 @@ export default function SkinDetailPage() {
                     Zpět
                 </button>
 
-                {/* Název itemu - na celou šířku nad kartami (symetrické) */}
-                <h1 className="text-base sm:text-lg lg:text-xl font-medium text-gray-200 mb-3 leading-tight text-center lg:text-left">
-                    {skin.name}
-                </h1>
+                {/* Název itemu - vizuálně skrytý (na přání klienta), ponechán jen pro SEO / čtečky */}
+                <h1 className="sr-only">{skin.name}</h1>
 
                 <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr] gap-3 lg:gap-4 items-stretch">
-                    {/* Levý sloupec - Obrázek (na mobilu vlevo a vyplní výšku, na PC původní) */}
-                    <div className="h-full">
-                        {/* Mobilní obrázek - object-contain, zachová poměr stran (celý obrázek), vlevo vedle ceny */}
+                    {/* Levý sloupec - Obrázek (na mobilu se přesně dorovná k výšce ceny, na PC původní) */}
+                    <div className="relative min-h-[120px]">
+                        {/* Mobilní obrázek - absolutně vyplní sloupec (stejná výška jako karta ceny, žádný "zub") */}
                         <div
-                            className="lg:hidden relative bg-[#161616] rounded-2xl border border-[#161616] overflow-hidden h-full min-h-[30vh] cursor-pointer"
+                            className="lg:hidden absolute inset-0 bg-[#161616] rounded-2xl border border-[#161616] overflow-hidden cursor-pointer"
                             onClick={() => setIsImageModalOpen(true)}
                         >
                             {skin.detailImageUrl ? (
@@ -193,8 +191,8 @@ export default function SkinDetailPage() {
                         </div>
                     </div>
 
-                    {/* Pravý sloupec - Cena */}
-                    <div className="space-y-3 lg:space-y-4">
+                    {/* Pravý sloupec - Cena (na mobilu bez space-y, ať skryté děti nepřidají margin = "zub") */}
+                    <div className="lg:space-y-4">
                         {/* Price - Always First */}
                         <div className="bg-[#161616] text-white rounded-xl p-3 shadow-lg border border-[#161616]">
                             <div className="flex items-center justify-center gap-3 mb-2">
@@ -236,9 +234,9 @@ export default function SkinDetailPage() {
                                 )}
                             </div>
 
-                            {/* Price Disclaimer - na PC v kartě, na mobilu je pod obrázkem (aby karta nebyla vysoká) */}
-                            <div className="hidden lg:block lg:mt-3 lg:mb-3 lg:pt-3 border-t border-[#161616] text-center">
-                                <p className="text-sm text-white italic">
+                            {/* Price Disclaimer - hned pod cenou/EUR v cenovém sloupci (mobil i PC) */}
+                            <div className="mt-3 mb-2 pt-3 lg:mb-3 border-t border-[#161616] text-center">
+                                <p className="text-[11px] leading-tight lg:text-sm text-white italic">
                                     Tato cena je pouze orientační a je nutné jí ověřit.
                                     <br />
                                     Nacenění skinů vychází z prodejních dat nejověřenějších obchodních stránek.
@@ -256,24 +254,24 @@ export default function SkinDetailPage() {
                                         <div className="flex flex-wrap gap-2 justify-center">
                                             {/* Show trade lock if restriction date is in the future */}
                                             {isTradeRestricted ? (
-                                                <span className="bg-red-900/50 text-red-400 px-3 py-1.5 rounded text-xs font-medium border border-red-700">
+                                                <span className="bg-red-900/50 text-red-400 px-2 py-1 rounded text-[11px] font-medium border border-red-700">
                                                     🔒 Nelze vyměnit - Obchodovatelné od: {skin.tradeRestrictionDate}
                                                 </span>
                                             ) : (
                                                 <>
                                                     {/* Show normal badges if no restriction or date has passed */}
                                                     {skin.tradable && (
-                                                        <span className="bg-green-900/50 text-green-400 px-3 py-1.5 rounded text-xs font-medium border border-green-700">
+                                                        <span className="bg-green-900/50 text-green-400 px-2 py-1 rounded text-[11px] font-medium border border-green-700">
                                                             ✅ Lze vyměnit
                                                         </span>
                                                     )}
                                                     {skin.marketable && (
-                                                        <span className="bg-blue-900/50 text-blue-400 px-3 py-1.5 rounded text-xs font-medium border border-blue-700">
+                                                        <span className="bg-blue-900/50 text-blue-400 px-2 py-1 rounded text-[11px] font-medium border border-blue-700">
                                                             💰 Lze prodat
                                                         </span>
                                                     )}
                                                     {!skin.tradable && skin.tradable !== undefined && (
-                                                        <span className="bg-red-900/50 text-red-400 px-3 py-1.5 rounded text-xs font-medium border border-red-700">
+                                                        <span className="bg-red-900/50 text-red-400 px-2 py-1 rounded text-[11px] font-medium border border-red-700">
                                                             🔒 Nelze vyměnit
                                                         </span>
                                                     )}
@@ -385,12 +383,9 @@ export default function SkinDetailPage() {
                     </div>
                 </div>
 
-                {/* Statistiky + upozornění k ceně na mobilu - pod obrázkem, na celou šířku */}
+                {/* Statistiky na mobilu - pod obrázkem, na celou šířku */}
                 <div className="lg:hidden mt-3 space-y-3">
                     <SkinStats skin={skin} />
-                    <p className="text-[11px] leading-snug text-center text-gray-400 italic px-2">
-                        Tato cena je pouze orientační a je nutné jí ověřit. Nacenění skinů vychází z prodejních dat nejověřenějších obchodních stránek.
-                    </p>
                 </div>
             </div>
             {/* Image Modal */}

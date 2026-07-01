@@ -59,9 +59,9 @@ export default function SkinCard({ skin }: SkinProps) {
                     </div>
                 )}
 
-                {/* Wear Badge - Top Right */}
+                {/* Wear Badge - Top Right (sjednocená neutrální šedá jako cena) */}
                 {skin.wear && (
-                    <div className="absolute top-2 right-2 bg-gray-900/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
+                    <div className="absolute top-2 right-2 bg-[#161616]/95 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm border border-white/10">
                         {SkinUtils.translateWear(skin.wear)}
                     </div>
                 )}
@@ -140,7 +140,7 @@ export default function SkinCard({ skin }: SkinProps) {
 
                         {/* Foťák – nemá vlastní akci, klik probublá na kartu a otevře detail. Rozsvítí se při najetí na kartu. */}
                         <div
-                            className="shrink-0 flex items-center justify-center bg-[#161616] group-hover:bg-gray-800 text-gray-400 group-hover:text-white p-1.5 sm:p-2 rounded-lg border border-gray-800 group-hover:border-gray-600 transition-colors"
+                            className="shrink-0 flex items-center justify-center bg-[#161616] group-hover:bg-white/5 text-white/60 group-hover:text-white p-1.5 sm:p-2 rounded-lg border border-white/10 group-hover:border-white/20 transition-colors"
                             title="Zobrazit detail"
                             aria-hidden="true"
                         >
