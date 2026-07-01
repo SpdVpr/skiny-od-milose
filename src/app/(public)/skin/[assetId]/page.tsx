@@ -21,10 +21,19 @@ export default function SkinDetailPage() {
     const [exchangeRate, setExchangeRate] = useState<number>(25);
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
-    // iOS/Safari: po otevření detailu srovnat scroll nahoru (jinak se přenese scroll z katalogu → uříznutý vršek)
+    // iOS/Safari: spolehlivě srovnat scroll nahoru – při mountu i PO dokončení načítání,
+    // kdy se obsah zvětší (u vyšších itemů jinak zůstane přenesený scroll z katalogu → uříznutý vršek).
     useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [assetId]);
+        if (typeof window === 'undefined') return;
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+        const toTop = () => window.scrollTo(0, 0);
+        toTop();
+        const raf = requestAnimationFrame(toTop);
+        const t = setTimeout(toTop, 120);
+        return () => { cancelAnimationFrame(raf); clearTimeout(t); };
+    }, [assetId, loading]);
 
     useEffect(() => {
         const fetchSkin = async () => {
