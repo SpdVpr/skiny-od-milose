@@ -129,20 +129,25 @@ export default function SkinDetailPage() {
             <div className="fixed inset-0 z-0 bg-black/86" />
 
             <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-3 sm:py-6" style={{ maxWidth: '1500px' }}>
-                {/* Back Button - když není historie (přímý vstup / refresh), vrátí na katalog */}
-                <button
-                    onClick={() => {
-                        if (typeof window !== 'undefined' && window.history.length > 1) {
-                            router.back();
-                        } else {
-                            router.push('/');
-                        }
-                    }}
-                    className="flex items-center gap-2 text-gray-400 hover:text-white mb-3 transition-colors py-2 pr-3 -ml-1 pl-1"
-                >
-                    <ArrowLeft size={20} />
-                    Zpět
-                </button>
+                {/* Horní lišta: Zpět (vždy na homepage) vlevo + logo vycentrované (jen na telefonech) */}
+                <div className="relative flex items-center mb-3">
+                    <button
+                        onClick={() => router.push('/')}
+                        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors py-2 pr-3 -ml-1 pl-1"
+                    >
+                        <ArrowLeft size={20} />
+                        Zpět
+                    </button>
+
+                    {/* Logo - jen mobil, vycentrované (inline style kvůli spolehlivosti v Tailwind v4) */}
+                    <button
+                        onClick={() => router.push('/')}
+                        className="lg:hidden absolute text-xl text-white tracking-wide whitespace-nowrap"
+                        style={{ fontFamily: "'SF Orson Casual', sans-serif", fontWeight: 300, left: '50%', transform: 'translateX(-50%)' }}
+                    >
+                        skiny od miloše
+                    </button>
+                </div>
 
                 {/* Název itemu - vizuálně skrytý (na přání klienta), ponechán jen pro SEO / čtečky */}
                 <h1 className="sr-only">{skin.name}</h1>
