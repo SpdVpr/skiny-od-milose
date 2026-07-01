@@ -17,10 +17,10 @@ export default function SkinStats({ skin }: SkinStatsProps) {
           </div>
           <div className="flex-1">
             <div className="text-xs text-gray-400 font-medium">Float Value</div>
-            <div className="text-lg font-bold text-white">
-              {SkinUtils.formatFloat(skin.floatValue)}
+            <div className="text-lg font-bold text-white flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span>{SkinUtils.formatFloat(skin.floatValue)}</span>
               {skin.exterior && SkinUtils.isGoodFloat(skin.floatValue, skin.exterior) && (
-                <span className="ml-2 text-xs bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded-full border border-blue-700">
+                <span className="text-xs bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded-full border border-blue-700 whitespace-nowrap">
                   Dobrý float
                 </span>
               )}
