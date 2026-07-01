@@ -21,6 +21,11 @@ export default function SkinDetailPage() {
     const [exchangeRate, setExchangeRate] = useState<number>(25);
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
+    // iOS/Safari: po otevření detailu srovnat scroll nahoru (jinak se přenese scroll z katalogu → uříznutý vršek)
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [assetId]);
+
     useEffect(() => {
         const fetchSkin = async () => {
             try {

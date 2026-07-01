@@ -24,7 +24,8 @@ export default function SkinCard({ skin }: SkinProps) {
             style={{
                 borderTopColor: skin.rarityColor ? `#${skin.rarityColor}` : undefined,
                 borderTopWidth: skin.rarityColor ? '3px' : undefined,
-                padding: 'calc(var(--spacing) * 2)'
+                padding: 'calc(var(--spacing) * 2)',
+                transform: 'translateZ(0)' // iOS/Safari: vynutí kompozitní vrstvu, ať se ořežou zaoblené rohy
             }}
         >
             {/* Shine Effect */}
@@ -34,6 +35,7 @@ export default function SkinCard({ skin }: SkinProps) {
             {/* Image with Stickers - Square 1:1 with crop */}
             <div
                 className="relative aspect-square mb-4 overflow-hidden rounded-xl flex items-center justify-center"
+                style={{ transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }} // iOS/Safari: ořez zaoblených rohů u škálovaného obrázku
             >
                 <SkinImageWithStickers
                     skin={skin}
