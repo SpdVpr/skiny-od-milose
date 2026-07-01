@@ -119,7 +119,7 @@ export default function SkinDetailPage() {
             />
             <div className="fixed inset-0 z-0 bg-black/86" />
 
-            <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6" style={{ maxWidth: '1500px' }}>
+            <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-3 sm:py-6" style={{ maxWidth: '1500px' }}>
                 {/* Back Button - když není historie (přímý vstup / refresh), vrátí na katalog */}
                 <button
                     onClick={() => {
