@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Award, Hash, Tag, Camera } from 'lucide-react';
+import { Tag, Camera } from 'lucide-react';
 import { Skin, SkinUtils } from '@/types/skin';
 import SkinImageWithStickers from './SkinImageWithStickers';
 
@@ -12,6 +12,8 @@ interface SkinProps {
 
 export default function SkinCard({ skin }: SkinProps) {
     const router = useRouter();
+    const isStatTrak = skin.name.includes('StatTrak™');
+    const isSouvenir = skin.name.includes('Souvenir');
 
     const handleCardClick = () => {
         router.push(`/skin/${skin.assetId}`);
@@ -45,26 +47,29 @@ export default function SkinCard({ skin }: SkinProps) {
                     imageObjectFit="contain"
                     imageObjectPosition="center center"
                 />
+                {/* Top badges */}
+                {(isStatTrak || isSouvenir || skin.wear) && (
+                    <div className="absolute top-2 left-2 right-2 z-10 flex items-start justify-between gap-1 sm:gap-1.5 pointer-events-none">
+                        <div className="shrink-0">
+                            {isStatTrak && (
+                                <div className="bg-orange-500/90 backdrop-blur px-1.5 sm:px-2 py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs leading-none font-bold text-white shadow-sm">
+                                    <span className="sm:hidden">ST</span>
+                                    <span className="hidden sm:inline">StatTrak™</span>
+                                </div>
+                            )}
+                            {isSouvenir && (
+                                <div className="bg-[#b8a335]/90 backdrop-blur px-1.5 sm:px-2 py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs leading-none font-bold text-white shadow-sm">
+                                    Souvenir
+                                </div>
+                            )}
+                        </div>
 
-
-
-
-                {/* StatTrak Badge - Top Left */}
-                {skin.name.includes('StatTrak™') && (
-                    <div className="absolute top-2 left-2 bg-orange-500/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
-                        StatTrak™
-                    </div>
-                )}
-                {skin.name.includes('Souvenir') && (
-                    <div className="absolute top-2 left-2 bg-[#b8a335]/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
-                        Souvenir
-                    </div>
-                )}
-
-                {/* Wear Badge - Top Right (sjednocená neutrální šedá jako cena) */}
-                {skin.wear && (
-                    <div className="absolute top-2 right-2 bg-[#161616]/95 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm border border-white/10">
-                        {SkinUtils.translateWear(skin.wear)}
+                        {/* Wear Badge - Top Right (sjednocená neutrální šedá jako cena) */}
+                        {skin.wear && (
+                            <div className="min-w-0 max-w-full bg-[#161616]/95 backdrop-blur px-1.5 sm:px-2 py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs leading-none font-bold text-white shadow-sm border border-white/10 truncate">
+                                {SkinUtils.translateWear(skin.wear)}
+                            </div>
+                        )}
                     </div>
                 )}
 
